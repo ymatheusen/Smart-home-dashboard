@@ -1,3 +1,5 @@
+import { namedDevice } from "./names";
+
 export interface ShellyInfo {
   id: string;
   ip: string;
@@ -48,7 +50,6 @@ export function parseDevice(raw: unknown): ShellyDevice {
   if (
     !/^shellyplus2pm-[a-f0-9]{12}$/.test(d.id) ||
     typeof d.ip !== "string" ||
-    typeof d.name !== "string" ||
     !["cover", "switch"].includes(d.profile) ||
     !Array.isArray(d.channels) ||
     d.available !== true ||
@@ -63,7 +64,6 @@ export function parseDevice(raw: unknown): ShellyDevice {
       c.id < 0 ||
       c.id > (d.profile === "cover" ? 0 : 1) ||
       ids.has(c.id) ||
-      typeof c.name !== "string" ||
       typeof c.fault !== "boolean"
     )
       throw Error("De Shelly gaf geen geldige kanalen terug.");
@@ -90,7 +90,7 @@ export function parseDevice(raw: unknown): ShellyDevice {
     )
       throw Error("De rolluikstatus ontbreekt.");
   }
-  return d;
+  return namedDevice(d, {});
 }
 export const coverState = (state?: string) =>
   ({

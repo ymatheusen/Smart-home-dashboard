@@ -17,13 +17,15 @@ Een vierkante Hue Bridge met actuele firmware en de lokale CLIP v2-API is vereis
 
 Maak en bewerk scènes in de officiële Hue-app. Sla ze daar bij een kamer of zone op. De Android-app haalt de op de Bridge opgeslagen scènes op en activeert ze via hun oorspronkelijke resource-ID. Hij maakt geen kopieën en wijzigt of verwijdert je Hue-scènes niet. Losse voorbeeldscènes uit een galerij die nog niet op de Bridge zijn opgeslagen, kunnen niet worden opgehaald.
 
-In Live-modus tonen de snelknoppen je eigen favorieten met kamer- of zonenaam. Er passen maximaal zes scèneknoppen per pagina; extra scènes zijn bladerbaar. Tik na wijzigingen in de Hue-app op **Lampen en scènes verversen**. Bij zichtbare app wordt de status ook ongeveer elke tien seconden opnieuw uitgelezen.
+In Live-modus tonen de snelknoppen je eigen favorieten zonder kamer- of zonenaam. Open bij **Hue-scènes op Home** de icoonkeuze per scène om bijvoorbeeld Filmavond, Lezen of Slapen te kiezen. De keuze blijft op dit apparaat bewaard. Er passen maximaal zes scèneknoppen per pagina; extra scènes zijn bladerbaar. Tik na wijzigingen in de Hue-app op **Lampen en scènes verversen**. Bij zichtbare app wordt de status ook ongeveer elke tien seconden opnieuw uitgelezen.
 
 Tik op de verlichtingstegel voor de lijst met lampen en kamerfilter. Je kunt lampen schakelen en ondersteunde helderheid, wittemperatuur of kleur instellen. Met **Behouden** blijft de bestaande lichtkleur ongemoeid wanneer je alleen de helderheid toepast. De Bridge kan kleuren aanpassen aan het kleurbereik van de lamp.
 
 Een geslaagde opdracht betekent dat de Bridge de opdracht bevestigd heeft. De fysieke reactie van alle lampen moet thuis worden gecontroleerd. Onbereikbare lampen en een onbereikbare Bridge worden niet als succesvol bediend getoond. De overige integraties blijven demo. Demo-modus verstuurt geen licht- of scèneopdrachten.
 
 ## Shelly Plus 2PM koppelen · versie 0.5
+
+**Broncode bijgewerkt:** de aparte tegels, bediening bij loslaten, bewerkbare namen en Hue-scène-iconen zijn voorbereid voor een volgende APK. De gepubliceerde APK is hiermee nog niet bijgewerkt. Voor installatie over de bestaande app is de oorspronkelijke ondertekeningssleutel nodig.
 
 Installeer de nieuwe APK **over de bestaande Android-app heen**, met dezelfde ondertekeningssleutel. Verwijder de app niet: zo blijven de Hue-koppeling, Hue-favorieten en dashboardindeling behouden.
 
@@ -32,8 +34,8 @@ Installeer de nieuwe APK **over de bestaande Android-app heen**, met dezelfde on
 3. Laat het wachtwoordvak uit als lokale authenticatie niet aanstaat. Als de module een wachtwoord vraagt, vink je het aan en vul je het **lokale** Shelly-wachtwoord in; gebruikersnaam is `admin`. Je Shelly-cloudaccount is niet nodig.
 4. Tik op **Shelly controleren en toevoegen**. Alleen apparaatidentiteit, profiel, configuratie en status worden gelezen. Toevoegen verplaatst geen rolluik en schakelt geen lamp.
 5. Herhaal voor de andere modules. De app herkent Gen 2 Plus2PM in het bestaande `cover`- of `switch`-profiel. Hij verandert geen profiel, bedrading, beveiligingen, kalibratie of apparaatconfiguratie.
-6. Open **Verlichting** voor Hue-lampen en de twee afzonderlijke Shelly-lichtkanalen. De Plus 2PM is een schakelmodule en ondersteunt geen dimmen. Kanaalnamen stel je in de Shelly-app in; anders toont de app de modulenaam met lamp 1 en lamp 2.
-7. Open **Rolluiken** voor beide rolluiken. De Home-tegel biedt een keuzelijst plus open/stop/sluit voor het geselecteerde rolluik. Staat de tegel op een volgende tegelpagina, gebruik dan de pijlen of zet hem via **Indeling** vooraan. Bestaande indelingsvoorkeuren worden behouden.
+6. Open **Verlichting** voor Hue-lampen en de twee afzonderlijke Shelly-lichtkanalen. De Plus 2PM is een schakelmodule en ondersteunt geen dimmen. Open bij de opgeslagen module **Namen aanpassen** om de module en kanalen in deze app een eigen naam te geven. Deze namen blijven op dit apparaat bewaard en veranderen de Shelly-configuratie niet. Ontbrekende namen, ook `null`, krijgen een leesbare vervangende naam.
+7. Elk rolluik heeft een eigen tegel op Home en Kamers, met open/stop/sluit en na kalibratie een schuif. De schuif verstuurt één positieopdracht bij loslaten; toetsenbordbediening verstuurt bij loslaten van de toets. Afgebroken aanrakingen versturen geen opdracht. Tik op een tegeltitel voor de uitgebreide rolluikbediening. Staan de tegels op een volgende tegelpagina, gebruik dan de pijlen of zet Rolluik via **Indeling** vooraan. Bestaande indelingsvoorkeuren worden behouden.
 
 Procentbediening is alleen zichtbaar wanneer de module `pos_control: true` meldt. 0% betekent gesloten, 100% geopend. De getoonde stand komt van `current_pos`, geen animatie of geschatte looptijd. Kalibreren blijft een handeling in de Shelly-app. Een foutmelding of lopende kalibratie blokkeert bewegingen behalve Stop. Stop blijft ook na een mislukte uitlezing beschikbaar, maar vereist een bereikbare module om effect te hebben.
 

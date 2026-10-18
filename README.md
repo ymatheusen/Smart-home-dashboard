@@ -14,6 +14,8 @@ De aparte Android-app behoudt het dashboard en kan rechtstreeks op je thuisnetwe
 
 Je maakt en bewerkt scènes in de Hue-app. De Android-app haalt opgeslagen scènes op, laat je favorieten kiezen en activeert de oorspronkelijke Hue-scène. Lichtbediening ondersteunt aan/uit, helderheid en waar beschikbaar wittemperatuur en kleur. Hue en Shelly hebben elk een eigen Demo/Live-keuze. De Plus 2PM wordt in zijn bestaande profiel herkend: één rolluik of twee afzonderlijke schakelaars. Rolluiken ondersteunen open, stop en sluit, en procentbediening na kalibratie in de Shelly-app. De twee lichtkanalen ondersteunen aan/uit.
 
+De broncode bevat nu aparte rolluiktegels, positiebediening bij loslaten van de schuif, eigen Shelly-namen en instelbare Hue-scène-iconen zonder kamerlabel. Deze wijzigingen zijn nog niet opgenomen in de gepubliceerde APK; daarvoor is een nieuwe build met de oorspronkelijke ondertekeningssleutel nodig.
+
 Zie **[Android installeren, koppelen en bouwen](docs/ANDROID.md)** voor instructies, beveiliging, testresultaten en de nog benodigde thuistest. De browser-PWA blijft beschikbaar en toont een downloadlink naar de Android-app.
 
 ## Installeerbare app · versie 0.3

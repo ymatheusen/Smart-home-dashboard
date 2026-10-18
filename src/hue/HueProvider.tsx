@@ -8,6 +8,12 @@ import {
 } from "react";
 import { HueBridge, isNativeAndroid } from "./native";
 import {
+  isSceneIcon,
+  loadSceneIcons,
+  sceneIconsKey,
+  type SceneIconId,
+} from "./sceneIcons";
+import {
   parseSnapshot,
   type HueSnapshot,
   type HueBridgeInfo,
@@ -34,6 +40,8 @@ interface HueContextValue {
   busy: boolean;
   available: boolean;
   favorites: string[];
+  icons: Record<string, SceneIconId>;
+  setIcon(id: string, icon: SceneIconId): void;
   discover(): Promise<{ ip: string; name: string }[]>;
   inspect(ip: string): Promise<HueBridgeInfo>;
   pair(bridge: HueBridgeInfo): Promise<void>;
@@ -52,6 +60,7 @@ const errorMessage = (error: unknown) =>
       ? String((error as { message: string }).message)
       : "De Bridge is niet bereikbaar. Controleer of je op je thuisnetwerk zit.";
 export function HueProvider({ children }: { children: ReactNode }) {
+  const [icons, setIcons] = useState(loadSceneIcons);
   const [live, setLive] = useState(() => {
     try {
       return isNativeAndroid && localStorage.getItem(modeKey) === "true";
@@ -188,6 +197,18 @@ export function HueProvider({ children }: { children: ReactNode }) {
     busy,
     available,
     favorites,
+    icons,
+    setIcon: (id, icon) => {
+      if (!snapshot?.scenes.some((s) => s.id === id) || !isSceneIcon(icon))
+        return;
+      const next = { ...icons, [id]: icon };
+      try {
+        localStorage.setItem(sceneIconsKey, JSON.stringify(next));
+        setIcons(next);
+      } catch {
+        setError("Het scène-icoon kon niet worden opgeslagen.");
+      }
+    },
     discover: () => run(async () => (await HueBridge.discover()).bridges),
     inspect: (ip) => run(() => HueBridge.inspect({ ip })),
     pair: (bridge) =>

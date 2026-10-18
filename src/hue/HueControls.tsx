@@ -14,6 +14,12 @@ import {
   X,
 } from "lucide-react";
 import { useHue } from "./HueProvider";
+import {
+  defaultSceneIcon,
+  SceneIcon,
+  sceneIcons,
+  type SceneIconId,
+} from "./sceneIcons";
 import { androidDownloadUrl } from "./native";
 import { colorToXy, type HueBridgeInfo, type HueLight } from "./model";
 import "./hue.css";
@@ -257,29 +263,57 @@ export function HueSetup() {
           </div>
           <p className="hue-footnote">
             Maak of wijzig scènes in de Hue-app en tik daarna op verversen. Je
-            kiest hier alleen snelknoppen. Extra scènes krijgen een volgende
-            pagina.
+            kiest hier snelknoppen en hun icoon. Extra scènes krijgen een
+            volgende pagina.
           </p>
           <div className="hue-scene-options">
             {hue.snapshot.scenes.length ? (
               hue.snapshot.scenes.map((s) => (
-                <label key={s.id}>
-                  <input
-                    type="checkbox"
-                    checked={hue.favorites.includes(s.id)}
-                    onChange={() => hue.favorite(s.id)}
-                  />
-                  <span>
-                    {s.name}
-                    <small>{s.room}</small>
-                  </span>
-                  <Star
-                    size={15}
-                    fill={
-                      hue.favorites.includes(s.id) ? "currentColor" : "none"
-                    }
-                  />
-                </label>
+                <div className="hue-scene-option" key={s.id}>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={hue.favorites.includes(s.id)}
+                      onChange={() => hue.favorite(s.id)}
+                    />
+                    <span>{s.name}</span>
+                    <Star
+                      size={15}
+                      fill={
+                        hue.favorites.includes(s.id) ? "currentColor" : "none"
+                      }
+                    />
+                  </label>
+                  <details className="hue-icon-picker">
+                    <summary aria-label={`Icoon aanpassen · ${s.name}`}>
+                      <SceneIcon
+                        id={hue.icons[s.id] || defaultSceneIcon(s.name)}
+                        size={18}
+                      />{" "}
+                      Icoon
+                    </summary>
+                    <div
+                      className="hue-icon-grid"
+                      aria-label={`Icoon voor ${s.name}`}
+                    >
+                      {(Object.keys(sceneIcons) as SceneIconId[]).map((id) => (
+                        <button
+                          key={id}
+                          type="button"
+                          aria-label={`${sceneIcons[id].label} voor ${s.name}`}
+                          title={sceneIcons[id].label}
+                          aria-pressed={
+                            (hue.icons[s.id] || defaultSceneIcon(s.name)) === id
+                          }
+                          onClick={() => hue.setIcon(s.id, id)}
+                        >
+                          <SceneIcon id={id} size={22} />
+                          <span>{sceneIcons[id].label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </details>
+                </div>
               ))
             ) : (
               <p className="hue-help">
@@ -327,7 +361,7 @@ export function HueHomeScenes({
                 key={s.id}
                 className={`scene ${s.active && hue.available ? "active" : ""}`}
                 disabled={hue.busy || !hue.available}
-                title={`${s.name} · ${s.room}`}
+                title={s.name}
                 onClick={() =>
                   void hue
                     .scene(s.id)
@@ -337,9 +371,8 @@ export function HueHomeScenes({
                     .catch((e) => onMessage(e.message))
                 }
               >
-                <Lightbulb size={19} />
+                <SceneIcon id={hue.icons[s.id] || defaultSceneIcon(s.name)} />
                 <span>{s.name}</span>
-                <small>{s.room}</small>
               </button>
             ))}
           </div>

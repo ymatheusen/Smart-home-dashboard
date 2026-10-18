@@ -308,7 +308,13 @@ export default function App() {
   const visibleWidgets = layout[profile].order.filter(
     (id) => !layout[profile].hidden.includes(id),
   );
-  const displayedWidgets = page === "rooms" ? widgetIds : visibleWidgets;
+  const displayedWidgets = (
+    page === "rooms" ? widgetIds : visibleWidgets
+  ).flatMap<WidgetId | `shutter:${string}`>((id) => {
+    if (id !== "shutter" || !shelly.live) return [id];
+    const covers = shelly.devices.filter((d) => d.profile === "cover");
+    return covers.length ? covers.map((d) => `shutter:${d.id}` as const) : [id];
+  });
   const pageCount = Math.max(1, Math.ceil(displayedWidgets.length / capacity));
   const safeTilePage = Math.min(tilePage, pageCount - 1);
   const tileIds = displayedWidgets.slice(
@@ -338,15 +344,17 @@ export default function App() {
     camera: DoorOpen,
     kitchen: LampDesk,
   };
-  const tile = (id: WidgetId) => {
-    if (shelly.live && id === "shutter")
+  const tile = (tileId: WidgetId | `shutter:${string}`) => {
+    if (shelly.live && (tileId === "shutter" || tileId.startsWith("shutter:")))
       return (
         <ShellyHomeTile
-          key={id}
+          key={tileId}
+          device={shelly.devices.find((d) => tileId === `shutter:${d.id}`)}
           onOpen={() => setModal("shutter")}
           onMessage={notify}
         />
       );
+    const id = tileId as WidgetId;
     if (realLights && (id === "light" || id === "kitchen")) {
       const lights = hue.live ? hue.snapshot?.lights || [] : [];
       const shellyLights = shelly.live

@@ -8,6 +8,7 @@ import {
 } from "react";
 import { registerPlugin } from "@capacitor/core";
 import { isNativeAndroid } from "../hue/native";
+import { cleanName, loadNames, namedDevice, namesKey } from "./names";
 import {
   parseDevice,
   type ShellyDevice,
@@ -31,12 +32,14 @@ interface Value {
   error: string;
   add(ip: string, name: string, password: string): Promise<void>;
   remove(id: string): Promise<void>;
+  rename(id: string, name: string, channel?: number): void;
   refresh(): Promise<void>;
   setMode(live: boolean): void;
   command(input: ShellyCommand): Promise<void>;
 }
 const Context = createContext<Value | null>(null);
 export function ShellyProvider({ children }: { children: ReactNode }) {
+  const [names, setNames] = useState(loadNames);
   const [live, setLive] = useState(() => {
     try {
       return isNativeAndroid && localStorage.getItem(modeKey) === "true";
@@ -155,11 +158,38 @@ export function ShellyProvider({ children }: { children: ReactNode }) {
   const value: Value = {
     native: isNativeAndroid,
     live,
-    devices,
+    devices: devices.map((d) => namedDevice(d, names)),
     busy,
     pending,
     error,
     refresh,
+    rename: (id, name, channel) => {
+      const device = records.current.find((d) => d.id === id);
+      const cleaned = cleanName(name);
+      if (
+        !device ||
+        !cleaned ||
+        (channel !== undefined &&
+          !device.channels.some((c) => c.id === channel))
+      )
+        throw Error("Kies een geldige naam van maximaal 60 tekens.");
+      const next = {
+        ...names,
+        [id]:
+          channel === undefined
+            ? { ...names[id], name: cleaned }
+            : {
+                ...names[id],
+                channels: { ...names[id]?.channels, [channel]: cleaned },
+              },
+      };
+      try {
+        localStorage.setItem(namesKey, JSON.stringify(next));
+      } catch {
+        throw Error("De naam kon niet worden opgeslagen.");
+      }
+      setNames(next);
+    },
     add: (ip, name, password) =>
       settings(async () => {
         const next = parseDevice(await Shelly.add({ ip, name, password }));

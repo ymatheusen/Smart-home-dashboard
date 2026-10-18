@@ -57,36 +57,58 @@
   color: var(--gold);
   font-size: 11px;
 }
-.tile-value.shelly-home-value {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  align-content: center;
-  align-items: center;
-  gap: 6px;
-}
-.shelly-home-value select {
-  width: 100%;
-  min-width: 0;
-  min-height: 32px;
-  color: #c6d2b6;
-  background: #20251b;
-  border: 1px solid #ffffff15;
-  border-radius: 7px;
-  padding: 4px;
-  font-size: 10px;
-  text-overflow: ellipsis;
-}
-.shelly-home-value > span {
-  grid-column: 1 / -1;
-}
 .home-tile .tile-value.shelly-home-value strong {
   font-size: clamp(22px, 3vw, 44px);
 }
 .home-tile .tile-value.shelly-home-value strong small {
   font-size: 10px;
 }
-@media (max-width: 699px) {
-  .shelly-home-value select {
-    font-size: 8px;
-  }
+.shelly-names {
+  flex-basis: 100%;
+  font-size: 12px;
+  color: var(--gold);
+}
+.shelly-names summary {
+  cursor: pointer;
+  min-height: 32px;
+}
+.shelly-name-editor {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: end;
+  margin: 12px 0;
+}
+.shelly-name-editor .text-label {
+  flex: 1;
+  min-width: 160px;
+  margin: 0;
+}
+.shelly-name-editor .hue-secondary {
+  width: auto;
+  margin: 0;
+}
+.home-tile .shelly-position {
+  margin: 0;
+  font-size: 0;
+  gap: 0;
+}
+.home-tile .shelly-position span {
+  display: none;
+}
+.home-tile .shelly-position input {
+  height: 24px;
+  margin: 0;
+}
+.home-tile .tile-value.shelly-home-value {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 4px 0;
+}
+.home-tile .shelly-home-value > span {
+  font-size: 10px;
+  text-align: right;
 }
