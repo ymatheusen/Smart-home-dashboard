@@ -2,7 +2,7 @@
 
 ## Installeren en koppelen
 
-1. Download `https://raw.githubusercontent.com/ymatheusen/Smart-home-dashboard/refs/heads/gh-pages/android/Mijn-Woning.apk` op je Android-telefoon of tablet. De downloadpagina staat op `/Smart-home-dashboard/android/`.
+1. Download `https://raw.githubusercontent.com/ymatheusen/Smart-home-dashboard/refs/heads/gh-pages/android/Mijn-Woning-0.5.1-nieuwe-sleutel.apk` op je Android-telefoon of tablet. Gebruik voor 0.5.1 deze versiegebonden download. Verwijder de oudere Android-app eerst als die met de oude sleutel is ondertekend; zie de overstapinstructies hieronder.
 2. Open de APK. Android kan vragen of je browser deze app mag installeren. De app wordt handmatig geïnstalleerd en staat niet in de Play Store. Beveiligingscontroles hoeven niet uitgeschakeld te worden.
 3. Open het nieuw geïnstalleerde Android-icoon **Mijn Woning**. De eerdere browser-PWA kan daarnaast blijven bestaan; die heeft geen native Hue-koppeling. Browserinstellingen worden niet automatisch naar de Android-app overgezet.
 4. Verbind het toestel met hetzelfde thuisnetwerk als de Hue Bridge. Open **Instellingen** en de kaart **Philips Hue**.
@@ -25,9 +25,9 @@ Een geslaagde opdracht betekent dat de Bridge de opdracht bevestigd heeft. De fy
 
 ## Shelly Plus 2PM koppelen · versie 0.5
 
-**Broncode bijgewerkt:** de aparte tegels, bediening bij loslaten, bewerkbare namen en Hue-scène-iconen zijn voorbereid voor een volgende APK. De gepubliceerde APK is hiermee nog niet bijgewerkt. Voor installatie over de bestaande app is de oorspronkelijke ondertekeningssleutel nodig.
+**Build 0.5.1:** bevat aparte tegels, bediening bij loslaten, bewerkbare namen en Hue-scène-iconen. Deze build gebruikt op verzoek een nieuwe ondertekeningssleutel. Download: https://raw.githubusercontent.com/ymatheusen/Smart-home-dashboard/refs/heads/gh-pages/android/Mijn-Woning-0.5.1-nieuwe-sleutel.apk
 
-Installeer de nieuwe APK **over de bestaande Android-app heen**, met dezelfde ondertekeningssleutel. Verwijder de app niet: zo blijven de Hue-koppeling, Hue-favorieten en dashboardindeling behouden.
+Voor de overstap van 0.5.0 naar 0.5.1 moet je de bestaande app **eerst verwijderen**; Android accepteert de nieuwe ondertekening niet als update over de oude app. Noteer vooraf je Bridge- en Shelly-IP-adressen en maak zo nodig schermafbeeldingen van je indeling. Installeer daarna 0.5.1 en koppel Hue en Shelly opnieuw. Bij verwijderen verdwijnen de opgeslagen koppelingen, favorieten, eigen namen en indeling. Dit verandert de configuratie op de Bridge of Shelly-modules niet. Latere builds met dezelfde nieuwe sleutel kunnen wel over 0.5.1 heen worden geïnstalleerd.
 
 1. Verbind met het thuisnetwerk. Open **Instellingen → Shelly Plus 2PM**.
 2. Zoek het lokale IP-adres in de Shelly-app bij de apparaatinformatie. Vul een herkenbare naam en het IP-adres in. Voor deze installatie zijn er drie modules: twee rolluikmodules en één lichtmodule met twee kanalen.
@@ -86,3 +86,7 @@ Dit bouwt de Android-webbestanden, synchroniseert Capacitor, voert de native JVM
 Gecontroleerd: compilatie van de native module, vijf JVM-tests voor lokale adresvalidatie, resource-ID's, certificaatidentiteit, afgeschermde resources en foutafhandeling; vier modeltests; de koppel- en bedieningsflow in een browser met een gesimuleerde native Bridge; dashboardregressies; APK-ondertekening.
 
 Niet beschikbaar in de cloudomgeving: een fysieke Android-telefoon/tablet en jouw Hue Bridge. Daarom zijn de echte certificaathandshake met jouw firmware, mDNS op je router, Android Keystore op je toestel en de fysieke reactie van je lampen nog niet thuis bevestigd. Begin na koppelen met één herkenbare lamp en één scène. We kunnen vervolgens gericht corrigeren als jouw Bridge of toestel een afwijkende reactie geeft.
+
+### Nieuwe ondertekening van 0.5.1 bewaren
+
+De nieuwe sleutel staat privé buiten de repository in `/workspace/.cache/android-toolchain/signing/mijn-woning.keystore`, met configuratie `/workspace/.cache/android-toolchain/signing/private.json`. Deze paden horen bij de bouwomgeving van deze chat; een andere chat heeft niet automatisch dezelfde bestanden. Een privéback-up staat in `/workspace/shared/downloads/Mijn-Woning-sleutelbackup-PRIVE.zip`. Bewaar deze back-up buiten de tijdelijke bouwomgeving. Deel hem niet via GitHub of andere openbare downloads. Bij herstel naar een ander pad moet het `store`-pad in het configuratiebestand worden aangepast; wachtwoord en alias moeten behouden blijven. Alleen een nieuw sleutelpaar op hetzelfde pad aanmaken levert geen geldige update van deze APK op.

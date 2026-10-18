@@ -6,15 +6,17 @@ Een persoonlijk smart-homedashboard in Midnight Gold, ontworpen voor een Android
 
 De gepubliceerde demo staat op **https://ymatheusen.github.io/Smart-home-dashboard/**. GitHub Pages gebruikt de branch `gh-pages`, map `/ (root)`. De broncode staat op `codex/mijn-woning-demo`; deze branch kan niet rechtstreeks als website worden gepubliceerd.
 
-## Android-app met lokale Hue en Shelly · versie 0.5
+## Android-app met lokale Hue en Shelly · versie 0.5.1
 
-**APK-download:** https://raw.githubusercontent.com/ymatheusen/Smart-home-dashboard/refs/heads/gh-pages/android/Mijn-Woning.apk
+**Nieuwe APK-download (0.5.1):** https://raw.githubusercontent.com/ymatheusen/Smart-home-dashboard/refs/heads/gh-pages/android/Mijn-Woning-0.5.1-nieuwe-sleutel.apk
+
+**Nieuwe ondertekeningssleutel:** verwijder versie 0.5.0 eerst. Installeer daarna 0.5.1 en koppel Hue en Shelly opnieuw. Instellingen, favorieten en indeling uit de oude app worden bij verwijderen gewist. De oudere APK blijft beschikbaar via de oorspronkelijke downloadlink.
 
 De aparte Android-app behoudt het dashboard en kan rechtstreeks op je thuisnetwerk met een Hue Bridge verbinden. Je hebt geen Home Assistant, Hue-ontwikkelaarsaccount of cloudbackend nodig. Koppelen gebeurt in Instellingen via het Bridge-IP en de fysieke koppelknop. De sleutel blijft versleuteld in native app-opslag met Android Keystore.
 
 Je maakt en bewerkt scènes in de Hue-app. De Android-app haalt opgeslagen scènes op, laat je favorieten kiezen en activeert de oorspronkelijke Hue-scène. Lichtbediening ondersteunt aan/uit, helderheid en waar beschikbaar wittemperatuur en kleur. Hue en Shelly hebben elk een eigen Demo/Live-keuze. De Plus 2PM wordt in zijn bestaande profiel herkend: één rolluik of twee afzonderlijke schakelaars. Rolluiken ondersteunen open, stop en sluit, en procentbediening na kalibratie in de Shelly-app. De twee lichtkanalen ondersteunen aan/uit.
 
-De broncode bevat nu aparte rolluiktegels, positiebediening bij loslaten van de schuif, eigen Shelly-namen en instelbare Hue-scène-iconen zonder kamerlabel. Deze wijzigingen zijn nog niet opgenomen in de gepubliceerde APK; daarvoor is een nieuwe build met de oorspronkelijke ondertekeningssleutel nodig.
+De broncode bevat nu aparte rolluiktegels, positiebediening bij loslaten van de schuif, eigen Shelly-namen en instelbare Hue-scène-iconen zonder kamerlabel. Deze wijzigingen zitten in build 0.5.1. Omdat de oorspronkelijke ondertekeningssleutel niet beschikbaar was, is deze build met een nieuwe sleutel ondertekend. Bewaar de nieuwe sleutel en het bijbehorende configuratiebestand privé voor volgende updates.
 
 Zie **[Android installeren, koppelen en bouwen](docs/ANDROID.md)** voor instructies, beveiliging, testresultaten en de nog benodigde thuistest. De browser-PWA blijft beschikbaar en toont een downloadlink naar de Android-app.
 
