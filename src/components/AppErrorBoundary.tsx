@@ -18,7 +18,7 @@ export class AppErrorBoundary extends Component<
           <p>Er ging iets mis bij het openen van je dashboard.</p>
           <p>
             Vernieuw de pagina. Blijft dit gebeuren? Vermeld dan je browser en
-            webversie 0.2.0.
+            webversie {__APP_VERSION__}.
           </p>
           <button onClick={() => window.location.reload()}>
             Opnieuw laden

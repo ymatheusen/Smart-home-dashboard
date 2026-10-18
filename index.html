@@ -4,6 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#141614" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="Mijn Woning" />
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
     <meta
       name="description"
       content="Mijn Woning — jouw huis, in harmonie. Interactief smart-homeconcept."
@@ -57,7 +64,7 @@
             JavaScript om de demo te gebruiken.
           </p></noscript
         >
-        <small>Webversie 0.2.0</small>
+        <small>Webversie 0.3.0</small>
       </section>
     </div>
     <script>
@@ -66,7 +73,7 @@
           var status = document.getElementById("boot-status");
           if (status)
             status.textContent =
-              "Het dashboard kon niet worden geladen. Vernieuw de pagina of probeer Chrome, Firefox of Safari. Vermeld bij een fout webversie 0.2.0.";
+              "Het dashboard kon niet worden geladen. Vernieuw de pagina of probeer Chrome, Firefox of Safari. Vermeld bij een fout webversie 0.3.0.";
         }
         window.addEventListener("error", showLoadError, true);
         window.addEventListener("unhandledrejection", showLoadError);

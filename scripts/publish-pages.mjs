@@ -13,7 +13,15 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
 const source = process.cwd();
-for (const file of ["dist/index.html", "dist-standalone/index.html"]) {
+for (const file of [
+  "dist/index.html",
+  "dist/sw.js",
+  "dist/manifest.webmanifest",
+  "dist/icons/icon-192.png",
+  "dist/icons/icon-512.png",
+  "dist/icons/maskable-512.png",
+  "dist-standalone/index.html",
+]) {
   if (!existsSync(file))
     throw new Error(`Missing ${file}. Build the app before deploying.`);
 }

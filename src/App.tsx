@@ -49,6 +49,8 @@ import { tracks } from "./tracks";
 import { CameraArt, Switch } from "./components/DevicePrimitives";
 import { DeviceControls } from "./components/DeviceControls";
 import { LayoutEditor } from "./components/LayoutEditor";
+import { PwaControls, PwaUpdateNotice } from "./pwa/PwaControls";
+import { usePwa } from "./pwa/PwaProvider";
 const pages = [
   {
     id: "home",
@@ -101,6 +103,7 @@ const sceneList = [
   { name: "Alles uit", icon: Power },
 ] as const;
 export default function App() {
+  const { online } = usePwa();
   const [state, setState] = useState(loadState);
   const [layout, setLayout] = useState(loadLayout);
   const [layoutError, setLayoutError] = useState(false);
@@ -566,7 +569,7 @@ export default function App() {
         </a>
         <div className="header-actions">
           <span className="connection">
-            <span /> Demo actief
+            <span /> {online ? "Demo actief" : "Offline · demo"}
           </span>
           <button
             className="icon-button notification-button"
@@ -860,7 +863,9 @@ export default function App() {
               ? "Opslaan niet gelukt · controleer browseropslag"
               : pressureLow
                 ? "Lage waterdruk · demowaarschuwing"
-                : "Alles is demo · geen echte apparatenacties"}
+                : !online
+                  ? "Offline · je demobediening blijft beschikbaar"
+                  : "Alles is demo · geen echte apparatenacties"}
           </span>
           <span className="swipe-hint">
             <ChevronLeft size={11} /> Swipe of kies een scherm{" "}
@@ -931,6 +936,7 @@ export default function App() {
           </div>
           {modal === "settings" && (
             <>
+              <PwaControls />
               <label className="text-label">
                 Naam van je woning
                 <input
@@ -1055,7 +1061,7 @@ export default function App() {
                 </div>
                 <div>
                   <span>Webversie</span>
-                  <strong>0.2.0</strong>
+                  <strong>{__APP_VERSION__}</strong>
                 </div>
               </div>
               <div className="info-box">
@@ -1102,6 +1108,7 @@ export default function App() {
           )}
         </div>
       </dialog>
+      <PwaUpdateNotice visible={!modal} />
     </div>
   );
 }

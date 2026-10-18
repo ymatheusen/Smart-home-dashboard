@@ -6,6 +6,16 @@ Een persoonlijk smart-homedashboard in Midnight Gold, ontworpen voor een Android
 
 De gepubliceerde demo staat op **https://ymatheusen.github.io/Smart-home-dashboard/**. GitHub Pages gebruikt de branch `gh-pages`, map `/ (root)`. De broncode staat op `codex/mijn-woning-demo`; deze branch kan niet rechtstreeks als website worden gepubliceerd.
 
+## Installeerbare app · versie 0.3
+
+Open de HTTPS-demo in Chrome op je Android-telefoon of tablet. Ga naar **Instellingen → App installeren**. Als de browser nog geen installatieknop aanbiedt: gebruik **⋮ → Toevoegen aan startscherm → Installeren**. Op een laptop kan dit via het installatie-icoon in de adresbalk. Installeren is niet beschikbaar in incognitomodus. In Safari op iOS: **Deel → Zet op beginscherm**.
+
+Open de app één keer met internet en wacht in Instellingen op **Gereed voor offlinegebruik**. Daarna zijn de vijf demoschermen, bediening, lettertypen en illustraties ook na offline herladen of opnieuw openen beschikbaar. Instellingen blijven lokaal op hetzelfde apparaat. Browseropslag is geen back-up en kan door de browser of gebruiker worden gewist.
+
+Een nieuwe versie wordt op de achtergrond klaargezet. Kies **Bijwerken en heropenen** wanneer het uitkomt, of stel de update uit. Instellingen en indeling blijven behouden. In Instellingen kun je ook handmatig **Controleer op updates** kiezen. Volledig sluiten van de app kan een wachtende update bij de volgende start activeren. Open tabbladen van deze app herladen bij activering samen naar de nieuwe versie.
+
+De PWA heeft een eigen app-icoon en opent zonder de gewone browserbalk. Er is geen APK of appstore nodig. Echte apparaatbediening, pushmeldingen, scherm activeren en OS-helderheid zijn hiermee nog niet geïmplementeerd. De zelfstandige HTML-download en de Vite-ontwikkelserver registreren geen serviceworker.
+
 ## Compact dashboard · versie 0.2
 
 - **Home:** zes snelle scènes en standaard vier favoriete tegels: verlichting, klimaat, rolluik en muziek. Aan/uit, temperatuur en eenvoudige muziek- en rolluikbediening zijn direct beschikbaar.
@@ -39,6 +49,7 @@ npm run build
 npx playwright install chromium
 npm test
 npm run test:production
+npm run test:pwa
 ```
 
 Met de bestaande cloudbrowser:
@@ -46,9 +57,12 @@ Met de bestaande cloudbrowser:
 ```sh
 PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm test
 PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm run test:production
+PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm run test:pwa
 ```
 
 De productietest serveert uitsluitend de gebouwde bestanden onder `/Smart-home-dashboard/`. Hij controleert de echte productiestart, bediening en een zichtbare foutmelding bij geblokkeerd JavaScript. De overige tests controleren alle hoofdschermen en dichtheden, opgeslagen profielen, scènes, rolluikbediening, swipen, waarschuwingen en de deurbel-timer.
+
+De PWA-test gebruikt een tijdelijk normaal Chromium-profiel, omdat Chrome installatie in incognito blokkeert. Hij controleert de echte Chrome-installatievoorwaarden, manifest en PNG-iconen, echte serviceworker-installatie en -updates, offline herladen en opnieuw openen, het uitstellen van updates en behoud van instellingen en caches van andere websites. De testserver schakelt HTTP-cache uit, zodat offline succes niet alleen door de gewone browsercache kan komen. Installatie op een fysiek Android-toestel moet de gebruiker zelf afronden.
 
 ## Publiceren
 
@@ -67,8 +81,10 @@ Dit bouwt de gewone website en een zelfstandige HTML-versie, en publiceert de ge
 - `src/components/LayoutEditor.tsx`: dichtheid, zichtbaarheid en volgorde.
 - `src/components/DeviceControls.tsx`: uitgebreide bediening, onafhankelijk van de compacte Home-tegels.
 - `src/App.tsx`: schermnavigatie, paginering, simulaties en detailvensters.
+- `src/pwa/`: installatie, offline-status en updates met gebruikerskeuze.
+- `src/sw.ts`: vooraf opgeslagen appbestanden en offline navigatie binnen de appscope. Er worden geen externe API- of apparaatantwoorden gecachet.
 - `src/styles.css` en `src/dashboard.css`: centrale CSS-variabelen, kaartstijlen en schermvullende indeling.
 
 Illustraties en lettertypen worden lokaal meegeleverd. Geen externe font- of afbeeldingsdiensten zijn nodig. Woningnaam en apparaatstanden blijven na herladen bewaard; muziek start gepauzeerd. Druksimulaties zijn tijdelijk en gebruiken geen echte waarschuwingsgrenzen.
 
-De oorspronkelijke projectbeschrijving staat in `docs/PROJECT_BRIEF.md`. Een volledige thema-editor, vrije widgetformaten, drag-and-drop, PWA-installatie en live-integraties blijven vervolgstappen. Hue en Shelly vragen bereikbare lokale apparaten en mogelijk een lokale backend; Spotify vraagt veilige OAuth. Remeha- en Eufy-ondersteuning moet afzonderlijk onderzocht worden. Sla nooit echte sleutels op in deze frontend of browseropslag.
+De oorspronkelijke projectbeschrijving staat in `docs/PROJECT_BRIEF.md`. Een volledige thema-editor, vrije widgetformaten, drag-and-drop en live-integraties blijven vervolgstappen. Hue en Shelly vragen bereikbare lokale apparaten en mogelijk een lokale backend; Spotify vraagt veilige OAuth. Remeha- en Eufy-ondersteuning moet afzonderlijk onderzocht worden. Sla nooit echte sleutels op in deze frontend of browseropslag.
