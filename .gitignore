@@ -1,6 +1,11 @@
 node_modules/
 dist/
 dist-standalone/
+dist-android/
+*.keystore
+*.jks
 test-results/
 playwright-report/
 *.local
+
+artifacts/

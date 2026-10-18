@@ -24,7 +24,8 @@ registerRoute(
     request.mode === "navigate" &&
     url.origin === self.location.origin &&
     url.pathname.startsWith(scopePath) &&
-    !url.pathname.startsWith(`${scopePath}download/`),
+    !url.pathname.startsWith(`${scopePath}download/`) &&
+    !url.pathname.startsWith(`${scopePath}android/`),
   createHandlerBoundToURL("index.html"),
 );
 

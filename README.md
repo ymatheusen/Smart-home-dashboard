@@ -1,10 +1,20 @@
 # Mijn Woning
 
-Een persoonlijk smart-homedashboard in Midnight Gold, ontworpen voor een Android-telefoon en een verticale wandtablet. **Alle apparaten, weergegevens en camerabeelden zijn demo.** Er zijn geen accounts of echte apparaatkoppelingen nodig.
+Een persoonlijk smart-homedashboard in Midnight Gold, ontworpen voor een Android-telefoon en een verticale wandtablet. **De browser-PWA gebruikt demogegevens. De Android-app kan Philips Hue lokaal live koppelen.** De overige apparaten, weergegevens en camerabeelden blijven demo.
 
 ## Openen
 
 De gepubliceerde demo staat op **https://ymatheusen.github.io/Smart-home-dashboard/**. GitHub Pages gebruikt de branch `gh-pages`, map `/ (root)`. De broncode staat op `codex/mijn-woning-demo`; deze branch kan niet rechtstreeks als website worden gepubliceerd.
+
+## Android-app met lokale Hue · versie 0.4
+
+**Download:** https://ymatheusen.github.io/Smart-home-dashboard/android/
+
+De aparte Android-app behoudt het dashboard en kan rechtstreeks op je thuisnetwerk met een Hue Bridge verbinden. Je hebt geen Home Assistant, Hue-ontwikkelaarsaccount of cloudbackend nodig. Koppelen gebeurt in Instellingen via het Bridge-IP en de fysieke koppelknop. De sleutel blijft versleuteld in native app-opslag met Android Keystore.
+
+Je maakt en bewerkt scènes in de Hue-app. De Android-app haalt opgeslagen scènes op, laat je favorieten kiezen en activeert de oorspronkelijke Hue-scène. Lichtbediening ondersteunt aan/uit, helderheid en waar beschikbaar wittemperatuur en kleur. De Demo/Live-keuze geldt voor Hue; andere integraties blijven demo.
+
+Zie **[Android installeren, koppelen en bouwen](docs/ANDROID.md)** voor instructies, beveiliging, testresultaten en de nog benodigde thuistest. De browser-PWA blijft beschikbaar en toont een downloadlink naar de Android-app.
 
 ## Installeerbare app · versie 0.3
 
@@ -50,6 +60,7 @@ npx playwright install chromium
 npm test
 npm run test:production
 npm run test:pwa
+npm run test:hue
 ```
 
 Met de bestaande cloudbrowser:
@@ -85,6 +96,6 @@ Dit bouwt de gewone website en een zelfstandige HTML-versie, en publiceert de ge
 - `src/sw.ts`: vooraf opgeslagen appbestanden en offline navigatie binnen de appscope. Er worden geen externe API- of apparaatantwoorden gecachet.
 - `src/styles.css` en `src/dashboard.css`: centrale CSS-variabelen, kaartstijlen en schermvullende indeling.
 
-Illustraties en lettertypen worden lokaal meegeleverd. Geen externe font- of afbeeldingsdiensten zijn nodig. Woningnaam en apparaatstanden blijven na herladen bewaard; muziek start gepauzeerd. Druksimulaties zijn tijdelijk en gebruiken geen echte waarschuwingsgrenzen.
+Illustraties en lettertypen worden lokaal meegeleverd. Geen externe font- of afbeeldingsdiensten zijn nodig. Demo-instellingen blijven na herladen bewaard; live Hue-standen worden opnieuw van de Bridge gelezen; muziek start gepauzeerd. Druksimulaties zijn tijdelijk en gebruiken geen echte waarschuwingsgrenzen.
 
-De oorspronkelijke projectbeschrijving staat in `docs/PROJECT_BRIEF.md`. Een volledige thema-editor, vrije widgetformaten, drag-and-drop en live-integraties blijven vervolgstappen. Hue en Shelly vragen bereikbare lokale apparaten en mogelijk een lokale backend; Spotify vraagt veilige OAuth. Remeha- en Eufy-ondersteuning moet afzonderlijk onderzocht worden. Sla nooit echte sleutels op in deze frontend of browseropslag.
+De oorspronkelijke projectbeschrijving staat in `docs/PROJECT_BRIEF.md`. Een volledige thema-editor, vrije widgetformaten, drag-and-drop en de overige live-integraties blijven vervolgstappen. De Android-app koppelt Hue lokaal. Shelly vraagt een bereikbare lokale koppeling; Spotify vraagt veilige OAuth. Remeha- en Eufy-ondersteuning moet afzonderlijk onderzocht worden. Sla nooit echte sleutels op in deze frontend of browseropslag.

@@ -51,6 +51,8 @@ import { DeviceControls } from "./components/DeviceControls";
 import { LayoutEditor } from "./components/LayoutEditor";
 import { PwaControls, PwaUpdateNotice } from "./pwa/PwaControls";
 import { usePwa } from "./pwa/PwaProvider";
+import { useHue } from "./hue/HueProvider";
+import { HueSetup, HueHomeScenes, HueLights } from "./hue/HueControls";
 const pages = [
   {
     id: "home",
@@ -104,6 +106,7 @@ const sceneList = [
 ] as const;
 export default function App() {
   const { online } = usePwa();
+  const hue = useHue();
   const [state, setState] = useState(loadState);
   const [layout, setLayout] = useState(loadLayout);
   const [layoutError, setLayoutError] = useState(false);
@@ -320,6 +323,46 @@ export default function App() {
     kitchen: LampDesk,
   };
   const tile = (id: WidgetId) => {
+    if (hue.live && (id === "light" || id === "kitchen")) {
+      const lights = hue.snapshot?.lights || [];
+      return (
+        <article className="home-tile tile-light" key={id}>
+          <button
+            className="tile-open"
+            aria-label={`${widgetNames[id]} bedienen`}
+            onClick={() => setModal(id)}
+          >
+            <span className="device-icon">
+              <Lightbulb size={21} />
+            </span>
+            <span>
+              {id === "light" ? "Verlichting" : "Hue-kamers"}
+              <small>
+                Hue · {hue.available ? "lokaal live" : "niet bereikbaar"}
+              </small>
+            </span>
+            <ArrowUpRight size={16} />
+          </button>
+          <div className="tile-value">
+            <strong>
+              {hue.available
+                ? lights.filter((l) => l.on && l.reachable).length
+                : "–"}
+              <small> / {lights.length}</small>
+            </strong>
+            <span>
+              {hue.available ? "Hue-lampen aan" : "Stand niet actueel"}
+            </span>
+          </div>
+          <div className="tile-actions">
+            <button className="tile-text-action" onClick={() => setModal(id)}>
+              Lampen bedienen <ChevronRight size={15} />
+            </button>
+          </div>
+        </article>
+      );
+    }
+
     const Icon = icons[id];
     return (
       <article className={`home-tile tile-${id}`} key={id}>
@@ -569,7 +612,14 @@ export default function App() {
         </a>
         <div className="header-actions">
           <span className="connection">
-            <span /> {online ? "Demo actief" : "Offline · demo"}
+            <span />{" "}
+            {hue.live
+              ? hue.available
+                ? "Hue live · rest demo"
+                : "Hue niet bereikbaar"
+              : online
+                ? "Demo actief"
+                : "Offline · demo"}
           </span>
           <button
             className="icon-button notification-button"
@@ -641,26 +691,35 @@ export default function App() {
                 </span>
               </div>
             </div>
-            <section className="home-scenes" aria-label="Snelle scènes">
-              <div className="compact-heading">
-                <h2>De juiste sfeer</h2>
-                <span>{state.scene || "Maak het je eigen"}</span>
-              </div>
-              <div className="scenes">
-                {sceneList.map(({ name, icon: Icon }) => (
-                  <button
-                    key={name}
-                    className={`scene ${state.scene === name ? "active" : ""}`}
-                    aria-pressed={state.scene === name}
-                    onClick={() => applyScene(name)}
-                  >
-                    <Icon size={21} strokeWidth={1.4} />
-                    <span>{name}</span>
-                    {state.scene === name && <i className="scene-indicator" />}
-                  </button>
-                ))}
-              </div>
-            </section>
+            {hue.live ? (
+              <HueHomeScenes
+                onSetup={() => setModal("settings")}
+                onMessage={notify}
+              />
+            ) : (
+              <section className="home-scenes" aria-label="Snelle scènes">
+                <div className="compact-heading">
+                  <h2>De juiste sfeer</h2>
+                  <span>{state.scene || "Maak het je eigen"}</span>
+                </div>
+                <div className="scenes">
+                  {sceneList.map(({ name, icon: Icon }) => (
+                    <button
+                      key={name}
+                      className={`scene ${state.scene === name ? "active" : ""}`}
+                      aria-pressed={state.scene === name}
+                      onClick={() => applyScene(name)}
+                    >
+                      <Icon size={21} strokeWidth={1.4} />
+                      <span>{name}</span>
+                      {state.scene === name && (
+                        <i className="scene-indicator" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </section>
+            )}
             <section className="tile-section" aria-label="Favoriete apparaten">
               <div className="compact-heading">
                 <h2>Binnen handbereik</h2>
@@ -703,12 +762,18 @@ export default function App() {
           >
             <div className="screen-title">
               <div>
-                <span className="eyebrow">MIJN WONING · DEMO</span>
+                <span className="eyebrow">
+                  {hue.live
+                    ? "HUE LOKAAL · OVERIGE DEMO"
+                    : "MIJN WONING · DEMO"}
+                </span>
                 <h1>{pages.find((p) => p.id === page)?.heading}</h1>
                 <p>{pages.find((p) => p.id === page)?.description}</p>
               </div>
               {page === "rooms" && (
-                <span className="room-badge">Woonkamer & keuken</span>
+                <span className="room-badge">
+                  {hue.live ? "Alle apparaten" : "Woonkamer & keuken"}
+                </span>
               )}
             </div>
             {page === "rooms" && (
@@ -801,7 +866,9 @@ export default function App() {
                   {[
                     {
                       title: "Philips Hue",
-                      sub: `${activeLights} van 2 lampen aan`,
+                      sub: hue.live
+                        ? `${hue.snapshot?.lights.length || 0} Hue-lampen · ${hue.available ? "live" : "niet bereikbaar"}`
+                        : `${activeLights} van 2 lampen aan`,
                       icon: Lightbulb,
                     },
                     {
@@ -861,11 +928,15 @@ export default function App() {
           <span>
             {storageError || layoutError
               ? "Opslaan niet gelukt · controleer browseropslag"
-              : pressureLow
-                ? "Lage waterdruk · demowaarschuwing"
-                : !online
-                  ? "Offline · je demobediening blijft beschikbaar"
-                  : "Alles is demo · geen echte apparatenacties"}
+              : hue.live
+                ? hue.available
+                  ? "Hue lokaal live · overige apparaten demo"
+                  : "Hue niet bereikbaar · bediening geblokkeerd"
+                : pressureLow
+                  ? "Lage waterdruk · demowaarschuwing"
+                  : !online
+                    ? "Offline · je demobediening blijft beschikbaar"
+                    : "Alles is demo · geen echte apparatenacties"}
           </span>
           <span className="swipe-hint">
             <ChevronLeft size={11} /> Swipe of kies een scherm{" "}
@@ -908,7 +979,9 @@ export default function App() {
               <span className="eyebrow">
                 {doorbell
                   ? "ER STAAT IEMAND VOOR DE DEUR"
-                  : "MIJN WONING · DEMO"}
+                  : hue.live && (modal === "light" || modal === "kitchen")
+                    ? "HUE LOKAAL · LIVE"
+                    : "MIJN WONING · DEMO"}
               </span>
               <h2 id="dialog-title">
                 {modal === "settings"
@@ -937,6 +1010,7 @@ export default function App() {
           {modal === "settings" && (
             <>
               <PwaControls />
+              <HueSetup />
               <label className="text-label">
                 Naam van je woning
                 <input
@@ -961,13 +1035,13 @@ export default function App() {
               </button>
             </>
           )}
-          {(modal === "light" ||
+          {((modal === "light" && !hue.live) ||
             modal === "shutter" ||
             modal === "music" ||
             modal === "climate") && (
             <DeviceControls device={modal} {...controlProps} />
           )}
-          {modal === "light" && (
+          {modal === "light" && !hue.live && (
             <div className="warmth-controls">
               <label className="slider-label" htmlFor="warmth">
                 <span>Lichtkleur</span>
@@ -1001,7 +1075,7 @@ export default function App() {
               />
             </div>
           )}
-          {modal === "kitchen" && (
+          {modal === "kitchen" && !hue.live && (
             <div className="kitchen-control">
               <Lightbulb size={55} strokeWidth={1} />
               <p>Keukenverlichting · Philips Hue · demo</p>
@@ -1017,6 +1091,9 @@ export default function App() {
                 }
               />
             </div>
+          )}
+          {hue.live && (modal === "light" || modal === "kitchen") && (
+            <HueLights onMessage={notify} />
           )}
           {modal === "camera" && (
             <>
@@ -1057,7 +1134,9 @@ export default function App() {
                 </div>
                 <div>
                   <span>Apparaatkoppelingen</span>
-                  <strong>Allemaal demo</strong>
+                  <strong>
+                    {hue.live ? "Hue lokaal · overige demo" : "Allemaal demo"}
+                  </strong>
                 </div>
                 <div>
                   <span>Webversie</span>
@@ -1067,9 +1146,11 @@ export default function App() {
               <div className="info-box">
                 <ShieldCheck size={20} />
                 <p>
-                  Deze versie gebruikt geen echte apparaten, camerastreams of
-                  accounts. Drukwaarschuwingen zijn een simulatie; livegrenzen
-                  moeten later op je installatie worden afgestemd.
+                  {hue.live
+                    ? "Hue is lokaal gekoppeld. De overige apparaten en camerabeelden zijn voorbeelden."
+                    : "Deze versie gebruikt geen echte apparaten, camerastreams of accounts."}{" "}
+                  Drukwaarschuwingen zijn een simulatie; livegrenzen moeten
+                  later op je installatie worden afgestemd.
                 </p>
               </div>
             </>

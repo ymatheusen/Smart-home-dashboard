@@ -9,7 +9,15 @@
     "skipLibCheck": true,
     "noEmit": true,
     "esModuleInterop": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true
   },
-  "include": ["src", "vite.config.ts", "vite.standalone.config.ts", "playwright.config.ts", "tests"]
+  "include": [
+    "src",
+    "vite.config.ts",
+    "capacitor.config.ts",
+    "vite.standalone.config.ts",
+    "playwright.config.ts",
+    "tests"
+  ]
 }

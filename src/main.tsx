@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
+import { HueProvider } from "./hue/HueProvider";
 import { PwaProvider } from "./pwa/PwaProvider";
 import { AppErrorBoundary } from "./components/AppErrorBoundary";
 import "@fontsource/dm-sans/latin-400.css";
@@ -15,9 +16,11 @@ import "./dashboard.css";
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <PwaProvider>
-      <AppErrorBoundary>
-        <App />
-      </AppErrorBoundary>
+      <HueProvider>
+        <AppErrorBoundary>
+          <App />
+        </AppErrorBoundary>
+      </HueProvider>
     </PwaProvider>
   </React.StrictMode>,
 );

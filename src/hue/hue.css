@@ -1,0 +1,356 @@
+.hue-setup {
+  margin: 0 0 24px;
+  padding: 18px;
+  border: 1px solid #d6b87a33;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #d6b87a09, #ffffff02);
+}
+.hue-heading {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.hue-heading > div {
+  flex: 1;
+}
+.hue-heading h3 {
+  font-size: 12px;
+  font-weight: 500;
+}
+.hue-heading p {
+  font-size: 9px;
+  color: #9aaa8a;
+  margin-top: 5px;
+  line-height: 1.7;
+}
+.hue-help {
+  font-size: 11px;
+  line-height: 1.9;
+  color: #adb99d;
+  margin: 15px 0;
+}
+.hue-footnote {
+  font-size: 9px;
+  color: #8e9f7d;
+  line-height: 1.9;
+  margin-top: 12px;
+}
+.hue-primary,
+.hue-secondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 10px;
+  min-height: 44px;
+  padding: 12px 14px;
+  font-size: 11px;
+  width: 100%;
+  margin-top: 12px;
+}
+.hue-primary {
+  background: var(--gold);
+  color: #252a1e;
+}
+.hue-secondary {
+  border: 1px solid #ffffff18;
+  color: #c5d1b4;
+  background: #ffffff05;
+}
+.hue-mode {
+  display: flex;
+  gap: 7px;
+  margin: 15px 0;
+}
+.hue-mode button {
+  flex: 1;
+  min-height: 39px;
+  border-radius: 9px;
+  background: #ffffff04;
+  border: 1px solid #ffffff12;
+  color: #a7b797;
+  font-size: 11px;
+}
+.hue-mode button[aria-pressed="true"] {
+  color: var(--gold);
+  background: #d6b87a12;
+  border-color: #d6b87a55;
+}
+.hue-connection {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 10px;
+  line-height: 1.8;
+  color: #b4c3a0;
+}
+.hue-found {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px;
+  margin-top: 9px;
+  background: #ffffff04;
+  border: 1px solid #ffffff12;
+  border-radius: 10px;
+  width: 100%;
+  text-align: left;
+  color: var(--gold);
+}
+.hue-found > span {
+  flex: 1;
+  font-size: 11px;
+  color: #c6d2b6;
+}
+.hue-found small {
+  display: block;
+  font-size: 9px;
+  color: #8e9f7d;
+  margin-top: 4px;
+}
+.hue-pair,
+.hue-confirm {
+  border: 1px solid #d6b87a3b;
+  border-radius: 12px;
+  padding: 15px;
+  margin-top: 17px;
+}
+.hue-pair h4 {
+  font-size: 15px;
+  font-weight: 500;
+  margin: 13px 0 6px;
+}
+.hue-pair > p {
+  font-size: 9px;
+  color: #a1b18d;
+}
+.hue-pair ol {
+  padding-left: 18px;
+  font-size: 11px;
+  color: #becbad;
+  line-height: 1.9;
+}
+.hue-error {
+  border-left: 2px solid #d6b87a;
+  color: #e0cda6;
+  font-size: 11px;
+  line-height: 1.9;
+  padding: 3px 0 3px 11px;
+  margin-top: 15px;
+}
+.hue-confirm p {
+  font-size: 11px;
+  line-height: 1.8;
+  color: #acbd98;
+}
+.hue-scene-options {
+  max-height: 330px;
+  overflow-y: auto;
+  margin-top: 15px;
+}
+.hue-scene-options label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 57px;
+  border-bottom: 1px solid #ffffff0c;
+  font-size: 12px;
+  cursor: pointer;
+}
+.hue-scene-options input {
+  accent-color: var(--gold);
+  width: 17px;
+  height: 17px;
+}
+.hue-scene-options label > span {
+  flex: 1;
+}
+.hue-scene-options small {
+  display: block;
+  font-size: 9px;
+  color: #91a47c;
+  margin-top: 4px;
+}
+.hue-scene-options svg {
+  color: var(--gold);
+}
+.hue-empty-scenes {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 75px;
+  width: 100%;
+  padding: 16px;
+  border-radius: 13px;
+  border: 1px dashed #d6b87a44;
+  background: #d6b87a06;
+  color: var(--gold);
+  text-align: left;
+}
+.hue-empty-scenes > span {
+  flex: 1;
+  font-size: 11px;
+}
+.hue-empty-scenes small {
+  display: block;
+  color: #9bae88;
+  font-size: 9px;
+  margin-top: 6px;
+}
+.hue-home-scenes .scene > span {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.hue-home-scenes .scene small {
+  font-size: 7px;
+  color: #91a17e;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.hue-home-scenes .scene {
+  padding: 5px;
+  gap: 5px;
+}
+.hue-scene-pages {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 4px;
+  font-size: 8px;
+  color: #91a17e;
+  height: 24px;
+}
+.hue-scene-pages button {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 26px;
+  color: var(--gold);
+  background: transparent;
+}
+.hue-unavailable {
+  color: #d4bd8f;
+  font-size: 8px;
+  margin-top: 7px;
+}
+.hue-live-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 9px;
+  line-height: 1.7;
+  color: #a6b794;
+}
+.hue-live-info > span:nth-child(2) {
+  flex: 1;
+}
+.hue-room-select {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  font-size: 11px;
+  color: #9fb18a;
+  margin: 15px 0;
+}
+.hue-room-select select {
+  flex: 1;
+  min-width: 0;
+  min-height: 43px;
+  border-radius: 10px;
+  background: #1b2117;
+  border: 1px solid #ffffff18;
+  padding: 8px 12px;
+  color: #c9d7b8;
+}
+.hue-light-editor {
+  padding: 18px;
+  border: 1px solid #ffffff12;
+  border-radius: 14px;
+  background: #ffffff03;
+  margin: 13px 0;
+}
+.hue-light-heading {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  color: var(--gold);
+}
+.hue-light-heading > div {
+  flex: 1;
+  min-width: 0;
+}
+.hue-light-heading h3 {
+  font-size: 12px;
+  font-weight: 500;
+  color: #d4dfc6;
+}
+.hue-light-heading small {
+  display: block;
+  font-size: 8px;
+  color: #92a57c;
+  margin-top: 5px;
+}
+.hue-light-heading .switch {
+  margin-left: 10px;
+}
+.hue-slider {
+  display: block;
+  font-size: 10px;
+  color: #b4c49e;
+  margin-top: 20px;
+}
+.hue-slider > span {
+  float: right;
+  color: var(--gold);
+}
+.hue-color {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #b3c39b;
+  margin: 15px 0;
+}
+.hue-color input {
+  width: 65px;
+  min-height: 40px;
+  border: 1px solid #ffffff18;
+  border-radius: 7px;
+  background: transparent;
+}
+@media (max-width: 699px) {
+  .hue-setup {
+    padding: 14px;
+  }
+  .hue-heading h3 {
+    font-size: 11px;
+  }
+  .hue-heading p {
+    font-size: 8px;
+  }
+  .hue-home-scenes .scene {
+    gap: 2px;
+  }
+  .hue-home-scenes .scene > span {
+    font-size: 8px;
+  }
+  .hue-home-scenes .scene > svg {
+    width: 14px;
+    height: 14px;
+  }
+  .hue-home-scenes .scene small {
+    font-size: 6px;
+  }
+  .hue-light-editor {
+    padding: 14px;
+  }
+  .hue-scene-pages {
+    height: 22px;
+  }
+}

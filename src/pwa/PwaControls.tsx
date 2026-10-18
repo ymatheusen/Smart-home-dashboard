@@ -8,11 +8,31 @@ import {
   X,
 } from "lucide-react";
 import { usePwa } from "./PwaProvider";
+import { isNativeAndroid } from "../hue/native";
 import "./pwa.css";
 
 export function PwaControls() {
   const pwa = usePwa();
   const [instructions, setInstructions] = useState(false);
+  if (isNativeAndroid)
+    return (
+      <section className="pwa-settings">
+        <div className="pwa-heading">
+          <span className="device-icon">
+            <Smartphone size={22} />
+          </span>
+          <div>
+            <h3>Mijn Woning voor Android</h3>
+            <p>Appbestanden zijn ingebouwd en openen zonder internet.</p>
+          </div>
+          <span className="pwa-version">v{__APP_VERSION__}</span>
+        </div>
+        <p className="pwa-demo-note">
+          Hue kan lokaal live worden gekoppeld. De overige integraties blijven
+          demo. Een nieuwe APK installeer je over deze versie heen.
+        </p>
+      </section>
+    );
   return (
     <section className="pwa-settings" aria-label="App en offlinegebruik">
       <div className="pwa-heading">
