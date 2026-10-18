@@ -11,12 +11,39 @@
     <title>Mijn Woning · Welkom thuis</title>
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <style>
-      html, body { margin: 0; background: #141614; color: #eeeee8; }
-      .boot-screen { max-width: 420px; margin: 18vh auto; padding: 28px; font: 16px/1.7 system-ui, sans-serif; }
-      .boot-screen h1 { color: #d6b87a; font-size: 28px; font-weight: 500; }
-      .boot-screen p { color: #aeb39f; }
-      .boot-screen small { color: #858e78; }
-      .boot-screen button { padding: 12px 20px; border: 0; border-radius: 10px; background: #d6b87a; color: #141614; cursor: pointer; }
+      html,
+      body {
+        margin: 0;
+        background: #141614;
+        color: #eeeee8;
+      }
+      .boot-screen {
+        max-width: 420px;
+        margin: 18vh auto;
+        padding: 28px;
+        font:
+          16px/1.7 system-ui,
+          sans-serif;
+      }
+      .boot-screen h1 {
+        color: #d6b87a;
+        font-size: 28px;
+        font-weight: 500;
+      }
+      .boot-screen p {
+        color: #aeb39f;
+      }
+      .boot-screen small {
+        color: #858e78;
+      }
+      .boot-screen button {
+        padding: 12px 20px;
+        border: 0;
+        border-radius: 10px;
+        background: #d6b87a;
+        color: #141614;
+        cursor: pointer;
+      }
     </style>
   </head>
   <body>
@@ -24,18 +51,25 @@
       <section class="boot-screen">
         <h1>Mijn Woning</h1>
         <p id="boot-status" role="status">Je dashboard wordt geladen…</p>
-        <noscript><p>JavaScript is uitgeschakeld. Open deze website in een browser met JavaScript om de demo te gebruiken.</p></noscript>
-        <small>Webversie 0.1.1</small>
+        <noscript
+          ><p>
+            JavaScript is uitgeschakeld. Open deze website in een browser met
+            JavaScript om de demo te gebruiken.
+          </p></noscript
+        >
+        <small>Webversie 0.2.0</small>
       </section>
     </div>
     <script>
       (function () {
         function showLoadError() {
-          var status = document.getElementById('boot-status');
-          if (status) status.textContent = 'Het dashboard kon niet worden geladen. Vernieuw de pagina of probeer Chrome, Firefox of Safari. Vermeld bij een fout webversie 0.1.1.';
+          var status = document.getElementById("boot-status");
+          if (status)
+            status.textContent =
+              "Het dashboard kon niet worden geladen. Vernieuw de pagina of probeer Chrome, Firefox of Safari. Vermeld bij een fout webversie 0.2.0.";
         }
-        window.addEventListener('error', showLoadError, true);
-        window.addEventListener('unhandledrejection', showLoadError);
+        window.addEventListener("error", showLoadError, true);
+        window.addEventListener("unhandledrejection", showLoadError);
         window.setTimeout(showLoadError, 15000);
       })();
     </script>

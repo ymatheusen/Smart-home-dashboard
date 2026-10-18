@@ -1,8 +1,29 @@
 # Mijn Woning
 
-Interactief Home-concept voor een persoonlijk smart-homedashboard. Ontworpen voor Android-telefoon en een verticaal gemonteerde tablet. Standaardstijl: Midnight Gold.
+Een persoonlijk smart-homedashboard in Midnight Gold, ontworpen voor een Android-telefoon en een verticale wandtablet. **Alle apparaten, weergegevens en camerabeelden zijn demo.** Er zijn geen accounts of echte apparaatkoppelingen nodig.
 
-## Lokaal starten
+## Openen
+
+De gepubliceerde demo staat op **https://ymatheusen.github.io/Smart-home-dashboard/**. GitHub Pages gebruikt de branch `gh-pages`, map `/ (root)`. De broncode staat op `codex/mijn-woning-demo`; deze branch kan niet rechtstreeks als website worden gepubliceerd.
+
+## Compact dashboard · versie 0.2
+
+- **Home:** zes snelle scènes en standaard vier favoriete tegels: verlichting, klimaat, rolluik en muziek. Aan/uit, temperatuur en eenvoudige muziek- en rolluikbediening zijn direct beschikbaar.
+- **Kamers:** alle zes beschikbare apparaatgroepen. Tik op een tegeltitel om de uitgebreide bediening te openen.
+- **Klimaat:** thermostaatbediening en voorbeeldketeldruk.
+- **Camera:** geïllustreerde voordeur en een gesimuleerde deurbelmelding, die na 45 seconden sluit.
+- **Techniek:** demostatus van de integraties en een herstelbare simulatie van lage waterdruk.
+- Navigeer met de vaste onderbalk of een horizontale swipe op een vrij gedeelte van het scherm. Swipes op knoppen en sliders wisselen niet van scherm.
+
+### Zelf aanpassen
+
+Open **Indeling** op Home of de instellingenknop rechtsboven. Kies **Ruim**, **Normaal** of **Compact**. Zet Home-tegels aan of uit en verander de volgorde met de pijlen. Instellingen worden direct in de browser opgeslagen.
+
+Telefoon (minder dan 700 CSS-pixels breed) en tablet/groter scherm hebben afzonderlijke profielen. Je kunt beide profielen in de editor bewerken. Deze instellingen blijven op dit apparaat en worden niet automatisch naar een andere telefoon of tablet gesynchroniseerd.
+
+Het aantal tegels per pagina wordt berekend uit de werkelijke beschikbare schermhoogte en de gekozen dichtheid. Extra tegels krijgen een volgende pagina met pijltjes. De vijf hoofdschermen zijn getest zonder verticale of horizontale documentoverloop op 320×568, 360×640, 390×844, 800×1280, 1200×1920 en 1366×768 CSS-pixels, in alle drie dichtheden. Uitgebreide detailvensters en instellingen mogen scrollen. Grote browserlettertypen, sterke zoom en een geopend schermtoetsenbord kunnen de beschikbare ruimte verder beperken.
+
+## Ontwikkelen
 
 Vereist: Node.js 22.12+ (getest met 24) en npm.
 
@@ -11,50 +32,43 @@ npm ci
 npm run dev
 ```
 
-Vite meldt het lokale adres. Gebruik op je telefoon, binnen hetzelfde vertrouwde netwerk, het netwerkadres van de ontwikkelmachine met poort 5173. Een cloudmachine is niet automatisch via dat adres bereikbaar. Publiceer voor een externe telefoontest de statische `dist`-map bij een HTTPS-host na `npm run build`. Het project bevat uitsluitend demogegevens. Er is geen backend nodig.
+De ontwikkelserver luistert op poort 5173. Binnen een vertrouwd lokaal netwerk kun je het netwerkadres van je computer op je telefoon openen. Een cloudmachine is niet automatisch via dat adres bereikbaar; gebruik daarvoor de gepubliceerde HTTPS-demo.
 
 ```sh
 npm run build
 npx playwright install chromium
 npm test
-# Of gebruik een bestaande Chromium-installatie:
-# PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm test
+npm run test:production
 ```
 
-## In deze eerste ontwerpversie
+Met de bestaande cloudbrowser:
 
-- Responsieve Home-pagina, klok en datum.
-- Zes scènes die demoverlichting en rolluikstanden aanpassen.
-- Verlichting aan/uit, helderheid en kleurtemperatuur.
-- Thermostaatdoel aanpassen en voorbeeldketelgegevens bekijken.
-- Rolluik openen, stoppen, sluiten en positie instellen.
-- Gesimuleerde muziekbediening, nummerkeuze, voortgang en volume. Er wordt geen audio afgespeeld.
-- Geïllustreerde voordeur en deurbelvenster dat na 45 seconden sluit.
-- Woningnaam en apparaatinstellingen worden lokaal opgeslagen.
-- Toetsenbordbediening, gelabelde invoervelden en respect voor verminderde beweging.
+```sh
+PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm test
+PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm run test:production
+```
 
-**Alle apparaatwaarden, weergegevens en camerabeelden zijn gesimuleerd. Er worden geen echte apparaten aangestuurd.** Klok en datum gebruiken de tijdzone van het apparaat. Muziek start na herladen gepauzeerd.
+De productietest serveert uitsluitend de gebouwde bestanden onder `/Smart-home-dashboard/`. Hij controleert de echte productiestart, bediening en een zichtbare foutmelding bij geblokkeerd JavaScript. De overige tests controleren alle hoofdschermen en dichtheden, opgeslagen profielen, scènes, rolluikbediening, swipen, waarschuwingen en de deurbel-timer.
 
-## Opbouw en vervolgstappen
+## Publiceren
 
-`src/model.ts` bevat het getypeerde demomodel en validatie van opgeslagen instellingen. `src/App.tsx` bevat de Home-interface en interacties. `src/styles.css` bevat centrale CSS-variabelen en responsieve stijlen. De illustraties worden lokaal met CSS getekend; Lettertypen worden lokaal meegeleverd, zonder externe fontverzoeken.
+```sh
+npm run deploy:pages
+```
 
-Deze eerste versie is bedoeld voor beoordeling van het ontwerp. De volledige thema- en dashboard-editor, overige pagina's, PWA-installatie/offlinewerking en echte integraties volgen na bevestiging. Navigatie naar Kamers en Techniek is daarom gemarkeerd als ‘Later’. Klimaat en Camera openen nu detailvensters.
+Dit bouwt de gewone website en een zelfstandige HTML-versie, en publiceert de gegenereerde bestanden naar `gh-pages` van de bestaande origin. Het script wijzigt `main` niet. Een tijdelijke checkout onder `/tmp` bewaart de Pages-geschiedenis; er wordt zonder force gepusht. GitHub voert daarna automatisch `pages build and deployment` uit. Controleer de voltooide publicatie bij GitHub Actions voordat je een nieuwe release als gepubliceerd meldt.
 
-Voor latere livekoppelingen blijft een aparte adapterlaag nodig. Hue en Shelly vereisen bereikbare lokale apparaten en mogelijk een lokale backend; Spotify vereist veilige OAuth. Ondersteuning van Remeha en Eufy moet afzonderlijk onderzocht worden. Bewaar daarvoor geen sleutels in deze frontend of browseropslag.
+`npm run build:standalone` maakt daarnaast `dist-standalone/index.html` met alle scripts, stijlen en lettertypen ingebed. De gehoste download staat in `download/Mijn-Woning.html`. Sommige Android-bestandsviewers voeren geen JavaScript uit; gebruik op je telefoon bij voorkeur de gewone HTTPS-demo.
 
-## Zelfstandig HTML-bestand
+## Architectuur en vervolg
 
-`npm run build:standalone` maakt `dist-standalone/index.html`. Dit bestand bevat de volledige demo inclusief scripts, stijlen en lettertypen. Er zijn geen externe bestanden of accounts nodig. Open het na downloaden in een browser die lokale HTML met JavaScript ondersteunt. Sommige Android-bestandsviewers ondersteunen geen JavaScript; gebruik dan de gehoste versie via GitHub Pages. Lokale opslag is afhankelijk van de browser en hoe het bestand geopend wordt.
+- `src/model.ts`: getypeerde apparaatdemo en validatie van eerder opgeslagen gegevens.
+- `src/layout.ts`: afzonderlijke, gevalideerde indelingsprofielen voor telefoon en tablet.
+- `src/components/LayoutEditor.tsx`: dichtheid, zichtbaarheid en volgorde.
+- `src/components/DeviceControls.tsx`: uitgebreide bediening, onafhankelijk van de compacte Home-tegels.
+- `src/App.tsx`: schermnavigatie, paginering, simulaties en detailvensters.
+- `src/styles.css` en `src/dashboard.css`: centrale CSS-variabelen, kaartstijlen en schermvullende indeling.
 
-## GitHub Pages
+Illustraties en lettertypen worden lokaal meegeleverd. Geen externe font- of afbeeldingsdiensten zijn nodig. Woningnaam en apparaatstanden blijven na herladen bewaard; muziek start gepauzeerd. Druksimulaties zijn tijdelijk en gebruiken geen echte waarschuwingsgrenzen.
 
-De broncode wordt aangeboden op de branch `codex/mijn-woning-demo`. De publiceerbare demo staat op `gh-pages`. Om die bereikbaar te maken: open de repository op GitHub → Settings → Pages → Build and deployment → Deploy from a branch → `gh-pages` → `/ (root)` → Save.
-
-De verwachte URL na succesvolle activering is `https://ymatheusen.github.io/Smart-home-dashboard/`. Het inschakelen vereist repositorybeheerrechten. GitHub Pages-beschikbaarheid voor private repositories hangt af van het GitHub-abonnement; maak een repository niet zomaar openbaar.
-
-De `gh-pages`-branch bevat de gebouwde bestanden uit `dist`, `.nojekyll` en een downloadbare zelfstandige demo in `download/Mijn-Woning.html`. Publiceer uitsluitend deze branch. De broncodebranch bevat een Vite-ontwikkelbestand en kan niet rechtstreeks als Pages-website worden geserveerd. Publicatie van de Codex-cloudomgeving staat los van websitehosting.
-
-## Productiecontrole
-
-`PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm run test:production` bouwt de app en controleert de echte productiebestanden onder `/Smart-home-dashboard/`, inclusief bediening en een zichtbare melding bij geblokkeerd JavaScript. Zonder bestaande Chromium-installatie: `npx playwright install chromium` en `npm run test:production`.
+De oorspronkelijke projectbeschrijving staat in `docs/PROJECT_BRIEF.md`. Een volledige thema-editor, vrije widgetformaten, drag-and-drop, PWA-installatie en live-integraties blijven vervolgstappen. Hue en Shelly vragen bereikbare lokale apparaten en mogelijk een lokale backend; Spotify vraagt veilige OAuth. Remeha- en Eufy-ondersteuning moet afzonderlijk onderzocht worden. Sla nooit echte sleutels op in deze frontend of browseropslag.

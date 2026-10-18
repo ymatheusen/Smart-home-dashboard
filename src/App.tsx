@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowDown,
   ArrowUp,
@@ -6,18 +6,19 @@ import {
   Bell,
   Blinds,
   Check,
+  ChevronLeft,
   ChevronRight,
   CloudSun,
   Coffee,
   DoorOpen,
   Expand,
+  Gauge,
   Home,
   LampDesk,
   Leaf,
   Lightbulb,
   Minus,
   Moon,
-  MoreHorizontal,
   Music2,
   Pause,
   Play,
@@ -28,37 +29,69 @@ import {
   SkipBack,
   SkipForward,
   SlidersHorizontal,
-  Snowflake,
   Square,
-  Sun,
   Sunset,
+  Sun,
   Thermometer,
-  Volume2,
   Wifi,
   X,
 } from "lucide-react";
 import { initialState, loadState, storageKey, type Scene } from "./model";
-
-const tracks = [
+import {
+  loadLayout,
+  layoutStorageKey,
+  widgetNames,
+  widgetIds,
+  type Profile,
+  type WidgetId,
+} from "./layout";
+import { tracks } from "./tracks";
+import { CameraArt, Switch } from "./components/DevicePrimitives";
+import { DeviceControls } from "./components/DeviceControls";
+import { LayoutEditor } from "./components/LayoutEditor";
+const pages = [
   {
-    title: "Weightless",
-    artist: "Marconi Union",
-    collection: "Even helemaal thuis",
-    duration: 489,
+    id: "home",
+    label: "Home",
+    heading: "Welkom thuis",
+    description: "",
+    icon: Home,
   },
   {
-    title: "A Walk",
-    artist: "Tycho",
-    collection: "Rust in je hoofd",
-    duration: 316,
+    id: "rooms",
+    label: "Kamers",
+    heading: "Ruimte om te leven",
+    description: "Je apparaten, precies binnen handbereik.",
+    icon: LampDesk,
   },
   {
-    title: "Sunset Lover",
-    artist: "Petit Biscuit",
-    collection: "Een gouden avond",
-    duration: 237,
+    id: "climate",
+    label: "Klimaat",
+    heading: "Een aangenaam thuis",
+    description: "Comfort in huis, op jouw temperatuur.",
+    icon: Thermometer,
   },
-];
+  {
+    id: "camera",
+    label: "Camera",
+    heading: "Een oogje in het zeil",
+    description: "Je voordeur, rustig in beeld.",
+    icon: ShieldCheck,
+  },
+  {
+    id: "tech",
+    label: "Techniek",
+    heading: "Achter de schermen",
+    description: "Een helder overzicht van je woning.",
+    icon: SlidersHorizontal,
+  },
+] as const;
+type PageId = (typeof pages)[number]["id"];
+type Modal = WidgetId | "settings" | "notifications" | "system" | null;
+function readPage(): PageId {
+  const hash = window.location.hash.slice(1);
+  return pages.find((p) => p.id === hash)?.id || "home";
+}
 const sceneList = [
   { name: "Goedemorgen", icon: Coffee },
   { name: "Overdag", icon: Sun },
@@ -67,81 +100,68 @@ const sceneList = [
   { name: "Welterusten", icon: Moon },
   { name: "Alles uit", icon: Power },
 ] as const;
-type Modal =
-  "settings" | "climate" | "light" | "camera" | "notifications" | null;
-const formatTime = (seconds: number) =>
-  `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
-
-function Switch({
-  on,
-  label,
-  onClick,
-}: {
-  on: boolean;
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      className={`switch ${on ? "on" : ""}`}
-      role="switch"
-      aria-checked={on}
-      aria-label={label}
-      onClick={onClick}
-    >
-      <span />
-    </button>
-  );
-}
-function CardHeader({
-  icon,
-  title,
-  subtitle,
-  children,
-}: {
-  icon: ReactNode;
-  title: string;
-  subtitle: string;
-  children?: ReactNode;
-}) {
-  return (
-    <div className="card-header">
-      <div className="device-icon">{icon}</div>
-      <div className="device-title">
-        <h3>{title}</h3>
-        <span>{subtitle}</span>
-      </div>
-      {children}
-    </div>
-  );
-}
-function CameraArt() {
-  return (
-    <div
-      className="camera-art"
-      aria-label="Geïllustreerd voorbeeld van de voordeur, geen camerabeeld"
-      role="img"
-    >
-      <div className="wall-lines" />
-      <div className="porch-light" />
-      <div className="house-number">24</div>
-      <div className="front-door">
-        <span className="door-glass" />
-        <span className="door-handle" />
-      </div>
-      <div className="plant">
-        <i />
-        <i />
-        <i />
-        <b />
-      </div>
-      <span className="camera-caption">VOORBEELDBEELD</span>
-    </div>
-  );
-}
-
 export default function App() {
   const [state, setState] = useState(loadState);
+  const [layout, setLayout] = useState(loadLayout);
+  const [layoutError, setLayoutError] = useState(false);
+  const [profile, setProfile] = useState<Profile>(() =>
+    window.innerWidth < 700 ? "phone" : "tablet",
+  );
+  const [page, setPage] = useState<PageId>(readPage);
+  const [tilePage, setTilePage] = useState(0);
+  const [capacity, setCapacity] = useState(4);
+  const [pressureLow, setPressureLow] = useState(false);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const swipeStart = useRef<{ x: number; y: number } | null>(null);
+  useEffect(() => {
+    const update = () =>
+      setProfile(window.innerWidth < 700 ? "phone" : "tablet");
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+  useEffect(() => {
+    const update = () => {
+      setPage(readPage());
+      setTilePage(0);
+    };
+    window.addEventListener("hashchange", update);
+    return () => window.removeEventListener("hashchange", update);
+  }, []);
+  useEffect(() => {
+    try {
+      localStorage.setItem(layoutStorageKey, JSON.stringify(layout));
+      setLayoutError(false);
+    } catch {
+      setLayoutError(true);
+    }
+  }, [layout]);
+  useEffect(() => {
+    const grid = gridRef.current;
+    if (!grid) return;
+    const measure = () => {
+      const gap = parseFloat(getComputedStyle(grid).rowGap) || 12;
+      const tileHeight =
+        layout[profile].density === "roomy"
+          ? 174
+          : layout[profile].density === "compact"
+            ? 118
+            : 146;
+      setCapacity(
+        Math.min(
+          6,
+          Math.max(
+            2,
+            Math.floor((grid.clientHeight + gap) / (tileHeight + gap)) * 2,
+          ),
+        ),
+      );
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(grid);
+    return () => observer.disconnect();
+  }, [page, profile, layout[profile].density]);
+
   const [now, setNow] = useState(new Date());
   const [modal, setModal] = useState<Modal>(null);
   const [toast, setToast] = useState("");
@@ -263,10 +283,279 @@ export default function App() {
     notify(`Scène ‘${scene}’ geactiveerd · demo`);
   };
 
+  const visibleWidgets = layout[profile].order.filter(
+    (id) => !layout[profile].hidden.includes(id),
+  );
+  const displayedWidgets = page === "rooms" ? widgetIds : visibleWidgets;
+  const pageCount = Math.max(1, Math.ceil(displayedWidgets.length / capacity));
+  const safeTilePage = Math.min(tilePage, pageCount - 1);
+  const tileIds = displayedWidgets.slice(
+    safeTilePage * capacity,
+    (safeTilePage + 1) * capacity,
+  );
+  const controlProps = {
+    state,
+    setState,
+    shutterTarget,
+    setShutterTarget,
+    elapsed,
+    setElapsed,
+    changeTrack,
+  };
+  const navigate = (next: PageId) => {
+    setPage(next);
+    setTilePage(0);
+    window.location.hash = next;
+  };
+  const pressure = pressureLow ? "0,7" : "1,2";
+  const icons = {
+    light: Lightbulb,
+    climate: Thermometer,
+    shutter: Blinds,
+    music: Music2,
+    camera: DoorOpen,
+    kitchen: LampDesk,
+  };
+  const tile = (id: WidgetId) => {
+    const Icon = icons[id];
+    return (
+      <article className={`home-tile tile-${id}`} key={id}>
+        <button
+          className="tile-open"
+          aria-label={`${widgetNames[id]} bedienen`}
+          onClick={() => setModal(id)}
+        >
+          <span className="device-icon">
+            <Icon size={21} strokeWidth={1.5} />
+          </span>
+          <span>
+            {widgetNames[id]}
+            <small>
+              {id === "kitchen"
+                ? "Keuken"
+                : id === "camera"
+                  ? "Eufy · demo"
+                  : "Woonkamer"}
+            </small>
+          </span>
+          <ArrowUpRight size={16} />
+        </button>
+        <div className="tile-value">
+          {id === "light" ? (
+            <>
+              <strong>
+                {state.lights.living ? state.lights.brightness : 0}
+                <small>%</small>
+              </strong>
+              <span>
+                {state.lights.living ? "Warm & gezellig" : "Verlichting uit"}
+              </span>
+            </>
+          ) : id === "climate" ? (
+            <>
+              <strong>
+                20,5<small>°</small>
+              </strong>
+              <span>Doel {state.target.toLocaleString("nl-NL")}°</span>
+            </>
+          ) : id === "shutter" ? (
+            <>
+              <strong>
+                {state.shutter}
+                <small>%</small>
+              </strong>
+              <span>{shutterTarget === null ? "Geopend" : "In beweging…"}</span>
+            </>
+          ) : id === "music" ? (
+            <>
+              <strong className="track-title">{track.title}</strong>
+              <span>{track.artist} · demo</span>
+            </>
+          ) : id === "camera" ? (
+            <>
+              <strong className="text-value">Alles rustig</strong>
+              <span>Voorbeeld · geen livebeeld</span>
+            </>
+          ) : (
+            <>
+              <strong className="text-value">
+                {state.lights.kitchen ? "Licht aan" : "Licht uit"}
+              </strong>
+              <span>Philips Hue · demo</span>
+            </>
+          )}
+        </div>
+        <div className="tile-actions">
+          {id === "light" && (
+            <>
+              <span>{state.lights.living ? "Aan" : "Uit"}</span>
+              <Switch
+                label="Woonkamerverlichting"
+                on={state.lights.living}
+                onClick={() =>
+                  setState((s) => ({
+                    ...s,
+                    scene: null,
+                    lights: { ...s.lights, living: !s.lights.living },
+                  }))
+                }
+              />
+            </>
+          )}
+          {id === "kitchen" && (
+            <>
+              <span>Warm wit</span>
+              <Switch
+                label="Keukenverlichting"
+                on={state.lights.kitchen}
+                onClick={() =>
+                  setState((s) => ({
+                    ...s,
+                    scene: null,
+                    lights: { ...s.lights, kitchen: !s.lights.kitchen },
+                  }))
+                }
+              />
+            </>
+          )}
+          {id === "climate" && (
+            <>
+              <button
+                className="tile-control"
+                aria-label="Temperatuur verlagen"
+                disabled={state.target <= 15}
+                onClick={() =>
+                  setState((s) => ({
+                    ...s,
+                    target: Math.max(15, s.target - 0.5),
+                  }))
+                }
+              >
+                <Minus size={17} />
+              </button>
+              <span>{state.target > 20.5 ? "Verwarmt" : "Op temperatuur"}</span>
+              <button
+                className="tile-control"
+                aria-label="Temperatuur verhogen"
+                disabled={state.target >= 25}
+                onClick={() =>
+                  setState((s) => ({
+                    ...s,
+                    target: Math.min(25, s.target + 0.5),
+                  }))
+                }
+              >
+                <Plus size={17} />
+              </button>
+            </>
+          )}
+          {id === "shutter" && (
+            <>
+              <button
+                className="tile-control"
+                aria-label="Rolluik openen"
+                onClick={() => setShutterTarget(100)}
+              >
+                <ArrowUp size={17} />
+              </button>
+              <button
+                className="tile-control"
+                aria-label="Rolluik stoppen"
+                onClick={() => setShutterTarget(null)}
+              >
+                <Square size={12} />
+              </button>
+              <button
+                className="tile-control"
+                aria-label="Rolluik sluiten"
+                onClick={() => setShutterTarget(0)}
+              >
+                <ArrowDown size={17} />
+              </button>
+            </>
+          )}
+          {id === "music" && (
+            <>
+              <button
+                className="tile-control"
+                aria-label="Vorig nummer"
+                onClick={() => changeTrack(-1)}
+              >
+                <SkipBack size={16} />
+              </button>
+              <button
+                className="tile-control play-quick"
+                aria-label={
+                  state.music.playing ? "Muziek pauzeren" : "Muziek afspelen"
+                }
+                onClick={() =>
+                  setState((s) => ({
+                    ...s,
+                    music: { ...s.music, playing: !s.music.playing },
+                  }))
+                }
+              >
+                {state.music.playing ? <Pause size={17} /> : <Play size={17} />}
+              </button>
+              <button
+                className="tile-control"
+                aria-label="Volgend nummer"
+                onClick={() => changeTrack(1)}
+              >
+                <SkipForward size={16} />
+              </button>
+            </>
+          )}
+          {id === "camera" && (
+            <button className="tile-text-action" onClick={ringDoorbell}>
+              <Bell size={15} /> Test deurbel
+            </button>
+          )}
+        </div>
+      </article>
+    );
+  };
+  const pager = (
+    <div className="tile-pagination">
+      <button
+        className="icon-button"
+        aria-label="Vorige tegelpagina"
+        disabled={safeTilePage === 0}
+        onClick={() => setTilePage(safeTilePage - 1)}
+      >
+        <ChevronLeft size={16} />
+      </button>
+      <span>
+        {pageCount > 1
+          ? `Tegels ${safeTilePage + 1} / ${pageCount}`
+          : "Alles in één oogopslag"}
+      </span>
+      <button
+        className="icon-button"
+        aria-label="Volgende tegelpagina"
+        disabled={safeTilePage >= pageCount - 1}
+        onClick={() => setTilePage(safeTilePage + 1)}
+      >
+        <ChevronRight size={16} />
+      </button>
+    </div>
+  );
+
   return (
-    <div className="app-shell">
+    <div
+      className={`app-shell dashboard-shell density-${layout[profile].density}`}
+      data-profile={profile}
+    >
       <header className="topbar">
-        <a href="#home" className="brand" aria-label="Mijn Woning, Home">
+        <a
+          href="#home"
+          onClick={(e) => {
+            e.preventDefault();
+            navigate("home");
+          }}
+          className="brand"
+          aria-label="Mijn Woning, Home"
+        >
           <span className="brand-mark">
             <Home size={21} strokeWidth={1.5} />
           </span>
@@ -285,7 +574,7 @@ export default function App() {
             onClick={() => setModal("notifications")}
           >
             <Bell size={20} />
-            {!notificationsRead && <i />}
+            {(!notificationsRead || pressureLow) && <i />}
           </button>
           <button
             className="icon-button"
@@ -296,542 +585,302 @@ export default function App() {
           </button>
         </div>
       </header>
-
-      <main id="home">
-        <section className="welcome">
-          <div className="welcome-copy">
-            <div className="eyebrow">
-              <span /> EEN FIJNE PLEK OM THUIS TE KOMEN
-            </div>
-            <h1>
-              Welkom thuis<span>.</span>
-            </h1>
-            <p>Alles op zijn plek. Precies zoals jij het wilt.</p>
-          </div>
-          <div className="time-weather">
-            <div className="clock">
-              {now.toLocaleTimeString("nl-NL", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-              <span>
-                {now.toLocaleDateString("nl-NL", {
-                  weekday: "long",
-                  day: "numeric",
-                  month: "long",
-                })}
-              </span>
-            </div>
-            <div className="weather">
-              <CloudSun size={35} strokeWidth={1.2} />
+      <main
+        className="dashboard-main"
+        id="home"
+        onPointerDown={(e) => {
+          swipeStart.current =
+            e.target instanceof Element &&
+            !e.target.closest("button, input, a, select")
+              ? { x: e.clientX, y: e.clientY }
+              : null;
+        }}
+        onPointerUp={(e) => {
+          const start = swipeStart.current;
+          swipeStart.current = null;
+          if (!start || modal) return;
+          const dx = e.clientX - start.x,
+            dy = e.clientY - start.y;
+          if (Math.abs(dx) > 70 && Math.abs(dy) < 45) {
+            const next =
+              pages.findIndex((p) => p.id === page) + (dx < 0 ? 1 : -1);
+            if (next >= 0 && next < pages.length) navigate(pages[next].id);
+          }
+        }}
+        onPointerCancel={() => {
+          swipeStart.current = null;
+        }}
+      >
+        {page === "home" ? (
+          <section className="home-content" aria-label="Home-overzicht">
+            <div className="home-greeting">
               <div>
-                16°<span>Halfbewolkt · demo</span>
+                <span className="eyebrow">JOUW HUIS, IN HARMONIE</span>
+                <h1>
+                  Welkom thuis<span>.</span>
+                </h1>
+                <p>
+                  {now.toLocaleDateString("nl-NL", {
+                    weekday: "long",
+                    day: "numeric",
+                    month: "long",
+                  })}
+                </p>
               </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="overview" aria-label="Woningoverzicht">
-          <span>
-            <span className="status-dot" />
-            Je woning in balans
-          </span>
-          <span>
-            <Lightbulb size={15} />
-            {activeLights} {activeLights === 1 ? "licht" : "lichten"} aan
-          </span>
-          <span>
-            <Thermometer size={15} />
-            20,5° binnen
-          </span>
-          <span>
-            <ShieldCheck size={15} />
-            Geen waarschuwingen
-          </span>
-          <span className="overview-demo">GESIMULEERDE GEGEVENS</span>
-        </section>
-
-        <section className="scenes-section">
-          <div className="section-heading">
-            <div>
-              <span className="eyebrow">HET JUISTE MOMENT</span>
-              <h2>Jouw scènes</h2>
-            </div>
-            <span className="section-note">Een tik. Een andere sfeer.</span>
-          </div>
-          <div className="scenes">
-            {sceneList.map(({ name, icon: Icon }) => (
-              <button
-                key={name}
-                className={`scene ${state.scene === name ? "active" : ""}`}
-                onClick={() => applyScene(name)}
-                aria-pressed={state.scene === name}
-              >
-                <span className="scene-icon">
-                  <Icon size={22} strokeWidth={1.4} />
-                </span>
-                <span>{name}</span>
-                {state.scene === name && <span className="scene-indicator" />}
-              </button>
-            ))}
-          </div>
-        </section>
-
-        <section className="devices-section">
-          <div className="section-heading">
-            <div>
-              <span className="eyebrow">BINNEN HANDBEREIK</span>
-              <h2>Thuis, op jouw manier</h2>
-            </div>
-            <span className="favorite-tag">
-              <span /> Jouw favorieten
-            </span>
-          </div>
-          <div className="widget-grid">
-            <article
-              className={`card light-card ${state.lights.living ? "lit" : ""}`}
-            >
-              <CardHeader
-                icon={<Lightbulb size={22} strokeWidth={1.5} />}
-                title="Sfeerverlichting"
-                subtitle="Woonkamer · Philips Hue"
-              >
-                <Switch
-                  label="Woonkamerverlichting"
-                  on={state.lights.living}
-                  onClick={() =>
-                    setState((s) => ({
-                      ...s,
-                      scene: null,
-                      lights: { ...s.lights, living: !s.lights.living },
-                    }))
-                  }
-                />
-              </CardHeader>
-              <div className="light-visual">
-                <div
-                  className={`lamp-glow ${state.lights.living ? "visible" : ""}`}
-                />
-                <LampDesk size={87} strokeWidth={0.85} />
-                <div>
-                  <span className="large-number">
-                    {state.lights.living ? state.lights.brightness : 0}
-                    <small>%</small>
-                  </span>
-                  <span className="muted">
-                    {state.lights.living
-                      ? "Een warme gloed"
-                      : "Even uitgeschakeld"}
-                  </span>
-                </div>
-              </div>
-              <div className="slider-label">
-                <span>Helderheid</span>
-                <Sun size={16} />
-              </div>
-              <input
-                aria-label="Helderheid woonkamer"
-                type="range"
-                min="1"
-                max="100"
-                value={state.lights.brightness}
-                disabled={!state.lights.living}
-                style={
-                  {
-                    "--fill": `${state.lights.brightness}%`,
-                  } as React.CSSProperties
-                }
-                onChange={(e) =>
-                  setState((s) => ({
-                    ...s,
-                    scene: null,
-                    lights: { ...s.lights, brightness: +e.target.value },
-                  }))
-                }
-              />
-              <button
-                className="card-footer button-footer"
-                onClick={() => setModal("light")}
-              >
+              <div className="home-clock">
+                {now.toLocaleTimeString("nl-NL", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
                 <span>
-                  <i className="warm-dot" /> Warm wit{" "}
-                  <span className="muted">
-                    · {Math.round(2200 + (100 - state.lights.warmth) * 43)} K
-                  </span>
+                  <CloudSun size={18} />
+                  16° <small>Demo</small>
                 </span>
-                <ChevronRight size={16} />
-              </button>
-            </article>
-
-            <article className="card climate-card">
-              <CardHeader
-                icon={<Thermometer size={22} strokeWidth={1.5} />}
-                title="Een aangenaam thuis"
-                subtitle="Woonkamer · Remeha"
-              >
-                <span className="tiny-label">
-                  <Leaf size={13} /> ECO
-                </span>
-              </CardHeader>
-              <div className="thermostat">
-                <div className="thermostat-inner">
-                  <span>BINNENTEMPERATUUR</span>
-                  <strong>
-                    20,5<small>°</small>
-                  </strong>
-                  <span className="heating">
-                    <span />{" "}
-                    {state.target > 20.5
-                      ? "Verwarming actief"
-                      : "Op temperatuur"}
-                  </span>
-                </div>
               </div>
-              <div className="temperature-control">
+            </div>
+            <section className="home-scenes" aria-label="Snelle scènes">
+              <div className="compact-heading">
+                <h2>De juiste sfeer</h2>
+                <span>{state.scene || "Maak het je eigen"}</span>
+              </div>
+              <div className="scenes">
+                {sceneList.map(({ name, icon: Icon }) => (
+                  <button
+                    key={name}
+                    className={`scene ${state.scene === name ? "active" : ""}`}
+                    aria-pressed={state.scene === name}
+                    onClick={() => applyScene(name)}
+                  >
+                    <Icon size={21} strokeWidth={1.4} />
+                    <span>{name}</span>
+                    {state.scene === name && <i className="scene-indicator" />}
+                  </button>
+                ))}
+              </div>
+            </section>
+            <section className="tile-section" aria-label="Favoriete apparaten">
+              <div className="compact-heading">
+                <h2>Binnen handbereik</h2>
                 <button
-                  className="round-button"
-                  aria-label="Temperatuur verlagen"
-                  disabled={state.target <= 15}
-                  onClick={() =>
-                    setState((s) => ({
-                      ...s,
-                      target: Math.max(15, s.target - 0.5),
-                    }))
-                  }
+                  className="text-button"
+                  onClick={() => setModal("settings")}
                 >
-                  <Minus size={18} />
-                </button>
-                <span>
-                  Ingesteld op{" "}
-                  <strong>
-                    {state.target.toLocaleString("nl-NL", {
-                      minimumFractionDigits: 1,
-                    })}
-                    °
-                  </strong>
-                </span>
-                <button
-                  className="round-button"
-                  aria-label="Temperatuur verhogen"
-                  disabled={state.target >= 25}
-                  onClick={() =>
-                    setState((s) => ({
-                      ...s,
-                      target: Math.min(25, s.target + 0.5),
-                    }))
-                  }
-                >
-                  <Plus size={18} />
+                  <SlidersHorizontal size={13} /> Indeling
                 </button>
               </div>
-              <button
-                className="card-footer button-footer"
-                onClick={() => setModal("climate")}
-              >
-                <span>Comfort zit in de details</span>
-                <ArrowUpRight size={16} />
-              </button>
-            </article>
-
-            <article className="card shutter-card">
-              <CardHeader
-                icon={<Blinds size={22} strokeWidth={1.5} />}
-                title="Licht van buiten"
-                subtitle="Woonkamer · Shelly"
-              >
-                <span className="online-dot" title="Demoapparaat online" />
-              </CardHeader>
-              <div className="shutter-body">
-                <div className="window-illustration">
-                  <div className="window-sky" />
-                  <div
-                    className="shutter-slats"
-                    style={{ height: `${100 - state.shutter}%` }}
-                  />
-                  <div className="window-frame" />
-                </div>
-                <div className="shutter-description">
-                  <span className="large-number">
-                    {state.shutter}
-                    <small>%</small>
-                  </span>
-                  <span className="muted">
-                    {shutterTarget === null
-                      ? "geopend"
-                      : shutterTarget > state.shutter
-                        ? "Wordt geopend…"
-                        : "Wordt gesloten…"}
-                  </span>
-                  <span className="subtle-tag">Rolluik voorzijde</span>
-                </div>
-              </div>
-              <input
-                aria-label="Rolluikpositie"
-                type="range"
-                min="0"
-                max="100"
-                value={shutterTarget ?? state.shutter}
-                style={
-                  {
-                    "--fill": `${shutterTarget ?? state.shutter}%`,
-                  } as React.CSSProperties
-                }
-                onChange={(e) => setShutterTarget(+e.target.value)}
-              />
-              <div className="shutter-buttons">
-                <button onClick={() => setShutterTarget(100)}>
-                  <ArrowUp size={17} /> Open
-                </button>
-                <button
-                  onClick={() => setShutterTarget(null)}
-                  aria-label="Rolluik stoppen"
-                >
-                  <Square size={13} /> Stop
-                </button>
-                <button onClick={() => setShutterTarget(0)}>
-                  <ArrowDown size={17} /> Dicht
-                </button>
-              </div>
-            </article>
-
-            <article className="card music-card">
-              <CardHeader
-                icon={<Music2 size={21} strokeWidth={1.5} />}
-                title="De soundtrack van thuis"
-                subtitle="Muziek · gesimuleerde speler"
-              >
-                <span className="music-bars">
-                  <i />
-                  <i />
-                  <i />
-                </span>
-              </CardHeader>
-              <div className="track-info">
-                <div className={`album-art album-${state.music.track}`}>
-                  <div className="album-sun" />
-                  <div className="album-ridge ridge-back" />
-                  <div className="album-ridge ridge-front" />
-                  <span>
-                    {state.music.track === 0
-                      ? "WEIGHTLESS"
-                      : state.music.track === 1
-                        ? "DIVE"
-                        : "SUNSET LOVER"}
-                  </span>
-                </div>
-                <div>
-                  <span className="eyebrow">{track.collection}</span>
-                  <h3>{track.title}</h3>
-                  <p>{track.artist}</p>
-                  <span className="speaker-label">
-                    <Volume2 size={12} /> Woonkamer · demo
-                  </span>
-                </div>
-              </div>
-              <div className="music-progress">
-                <input
-                  aria-label="Afspeelpositie"
-                  type="range"
-                  min="0"
-                  max={track.duration}
-                  value={elapsed}
-                  style={
-                    {
-                      "--fill": `${(elapsed / track.duration) * 100}%`,
-                    } as React.CSSProperties
-                  }
-                  onChange={(e) => setElapsed(+e.target.value)}
-                />
-                <div>
-                  <span>{formatTime(elapsed)}</span>
-                  <span>{formatTime(track.duration)}</span>
-                </div>
-              </div>
-              <div className="music-controls">
-                <button
-                  className="icon-button"
-                  aria-label="Vorig nummer"
-                  onClick={() => changeTrack(-1)}
-                >
-                  <SkipBack size={19} fill="currentColor" />
-                </button>
-                <button
-                  className="play-button"
-                  aria-label={
-                    state.music.playing ? "Muziek pauzeren" : "Muziek afspelen"
-                  }
-                  onClick={() =>
-                    setState((s) => ({
-                      ...s,
-                      music: { ...s.music, playing: !s.music.playing },
-                    }))
-                  }
-                >
-                  {state.music.playing ? (
-                    <Pause size={20} fill="currentColor" />
-                  ) : (
-                    <Play size={20} fill="currentColor" />
-                  )}
-                </button>
-                <button
-                  className="icon-button"
-                  aria-label="Volgend nummer"
-                  onClick={() => changeTrack(1)}
-                >
-                  <SkipForward size={19} fill="currentColor" />
-                </button>
-                <label className="volume">
-                  <Volume2 size={16} />
-                  <input
-                    aria-label="Muziekvolume"
-                    type="range"
-                    min="0"
-                    max="100"
-                    value={state.music.volume}
-                    style={
-                      {
-                        "--fill": `${state.music.volume}%`,
-                      } as React.CSSProperties
-                    }
-                    onChange={(e) =>
-                      setState((s) => ({
-                        ...s,
-                        music: { ...s.music, volume: +e.target.value },
-                      }))
-                    }
-                  />
-                </label>
-              </div>
-            </article>
-
-            <article className="card camera-card">
-              <CardHeader
-                icon={<DoorOpen size={22} strokeWidth={1.5} />}
-                title="Een oogje in het zeil"
-                subtitle="Voordeur · Eufy"
-              >
-                <span className="tiny-label">DEMO</span>
-              </CardHeader>
-              <button
-                className="camera-preview"
-                onClick={() => {
-                  setDoorbell(false);
-                  setModal("camera");
+              <div
+                className="home-tile-grid"
+                ref={gridRef}
+                style={{
+                  gridTemplateRows: `repeat(${Math.ceil(tileIds.length / 2) || 1}, minmax(0, 1fr))`,
                 }}
-                aria-label="Voorbeeld voordeur vergroten"
               >
-                <CameraArt />
-                <span className="camera-overlay">
-                  <span>
-                    <span className="status-dot" /> Voordeur
+                {tileIds.length ? (
+                  tileIds.map(tile)
+                ) : (
+                  <div className="empty-home">
+                    <Leaf size={28} />
+                    <p>Een rustig begin.</p>
+                    <button
+                      className="text-button"
+                      onClick={() => setModal("settings")}
+                    >
+                      Kies je Home-tegels
+                    </button>
+                  </div>
+                )}
+              </div>
+              {pager}
+            </section>
+          </section>
+        ) : (
+          <section
+            className={`section-content page-${page}`}
+            aria-label={pages.find((p) => p.id === page)?.label}
+          >
+            <div className="screen-title">
+              <div>
+                <span className="eyebrow">MIJN WONING · DEMO</span>
+                <h1>{pages.find((p) => p.id === page)?.heading}</h1>
+                <p>{pages.find((p) => p.id === page)?.description}</p>
+              </div>
+              {page === "rooms" && (
+                <span className="room-badge">Woonkamer & keuken</span>
+              )}
+            </div>
+            {page === "rooms" && (
+              <section
+                className="tile-section"
+                aria-label="Apparaten per kamer"
+              >
+                <div
+                  className="home-tile-grid"
+                  ref={gridRef}
+                  style={{
+                    gridTemplateRows: `repeat(${Math.ceil(tileIds.length / 2) || 1}, minmax(0, 1fr))`,
+                  }}
+                >
+                  {tileIds.map(tile)}
+                </div>
+                {pager}
+              </section>
+            )}
+            {page === "climate" && (
+              <div className="climate-stage">
+                <DeviceControls device="climate" {...controlProps} />
+                <button
+                  className={`boiler-summary ${pressureLow ? "has-warning" : ""}`}
+                  onClick={() => setModal("system")}
+                >
+                  <span className="device-icon">
+                    <Gauge size={22} />
                   </span>
-                  <Expand size={17} />
-                </span>
-              </button>
-              <div className="camera-footer">
-                <span>
-                  <ShieldCheck size={14} /> Alles rustig bij de voordeur
-                </span>
-                <button onClick={ringDoorbell}>
-                  <Bell size={14} /> Test deurbel
+                  <span>
+                    Je cv-ketel
+                    <small>
+                      {pressureLow
+                        ? "Lage waterdruk · simulatie"
+                        : "Voorbeeldstatus normaal"}
+                    </small>
+                  </span>
+                  <strong>
+                    {pressure} <small>bar</small>
+                  </strong>
+                  <ChevronRight size={16} />
+                </button>
+                <p className="screen-note">
+                  Alle temperaturen en ketelwaarden zijn demogegevens.
+                </p>
+              </div>
+            )}
+            {page === "camera" && (
+              <div className="camera-stage">
+                <button
+                  className="camera-large"
+                  aria-label="Voorbeeld voordeur vergroten"
+                  onClick={() => setModal("camera")}
+                >
+                  <CameraArt />
+                  <span className="camera-overlay">
+                    <span>
+                      <span className="status-dot" />
+                      Voordeur · voorbeeld
+                    </span>
+                    <Expand size={20} />
+                  </span>
+                </button>
+                <div className="camera-status">
+                  <ShieldCheck size={19} />
+                  <div>
+                    <strong>Een rustig gevoel</strong>
+                    <p>Geïllustreerd voorbeeld, geen liveverbinding.</p>
+                  </div>
+                </div>
+                <button className="primary-button" onClick={ringDoorbell}>
+                  <Bell size={18} /> Simuleer aanbellen
                 </button>
               </div>
-            </article>
-
-            <article className="card little-things">
-              <div className="section-heading">
-                <h3>De kleine dingen</h3>
-                <MoreHorizontal size={21} />
-              </div>
-              <div className="quick-device">
-                <div
-                  className={`quick-icon ${state.lights.kitchen ? "enabled" : ""}`}
+            )}
+            {page === "tech" && (
+              <div className="tech-stage">
+                <div className="system-overview">
+                  <span
+                    className={pressureLow ? "warning-dot" : "status-dot"}
+                  />
+                  <strong>
+                    {pressureLow
+                      ? "1 voorbeeldwaarschuwing"
+                      : "Je woning in balans"}
+                  </strong>
+                  <span>Demomodus</span>
+                </div>
+                <div className="integration-list">
+                  {[
+                    {
+                      title: "Philips Hue",
+                      sub: `${activeLights} van 2 lampen aan`,
+                      icon: Lightbulb,
+                    },
+                    {
+                      title: "Shelly",
+                      sub: `Rolluik ${state.shutter}% geopend`,
+                      icon: Blinds,
+                    },
+                    {
+                      title: "Remeha",
+                      sub: `Waterdruk ${pressure} bar`,
+                      icon: Thermometer,
+                    },
+                    {
+                      title: "Eufy",
+                      sub: "HomeBase & deurbel · voorbeeld",
+                      icon: ShieldCheck,
+                    },
+                  ].map(({ title, sub, icon: Icon }) => (
+                    <button
+                      key={title}
+                      className="integration-row"
+                      onClick={() => setModal("system")}
+                    >
+                      <span className="device-icon">
+                        <Icon size={20} />
+                      </span>
+                      <span>
+                        <strong>{title}</strong>
+                        <small>{sub}</small>
+                      </span>
+                      <span className="tiny-label">DEMO</span>
+                      <ChevronRight size={15} />
+                    </button>
+                  ))}
+                </div>
+                <button
+                  className="warning-test"
+                  onClick={() => {
+                    setPressureLow((v) => !v);
+                    notify(
+                      pressureLow
+                        ? "Voorbeelddruk hersteld"
+                        : "Lage waterdruk gesimuleerd",
+                    );
+                  }}
                 >
-                  <Lightbulb size={21} strokeWidth={1.4} />
-                </div>
-                <div>
-                  <strong>Keukenverlichting</strong>
-                  <span>
-                    {state.lights.kitchen
-                      ? "Aan · warm wit"
-                      : "Uit · klaar voor later"}
-                  </span>
-                </div>
-                <Switch
-                  label="Keukenverlichting"
-                  on={state.lights.kitchen}
-                  onClick={() =>
-                    setState((s) => ({
-                      ...s,
-                      scene: null,
-                      lights: { ...s.lights, kitchen: !s.lights.kitchen },
-                    }))
-                  }
-                />
+                  {pressureLow ? <Check size={17} /> : <Gauge size={17} />}{" "}
+                  {pressureLow
+                    ? "Herstel voorbeeldwaterdruk"
+                    : "Simuleer lage waterdruk"}
+                </button>
               </div>
-              <div className="home-note">
-                <span className="note-icon">
-                  <Leaf size={20} strokeWidth={1.3} />
-                </span>
-                <div>
-                  <strong>Even niets hoeven.</strong>
-                  <p>
-                    Je huis zorgt voor de juiste sfeer.
-                    <br />
-                    Jij hoeft alleen maar thuis te zijn.
-                  </p>
-                </div>
-              </div>
-              <div className="demo-note">
-                <span className="status-dot" /> Ontdek je woning in demomodus
-              </div>
-            </article>
-          </div>
-        </section>
-        {storageError && (
-          <p className="storage-warning" role="alert">
-            Instellingen kunnen niet worden opgeslagen. Controleer de
-            opslagrechten van je browser.
-          </p>
+            )}
+          </section>
         )}
-        <footer className="page-footer">
+        <div className="screen-bottom">
           <span>
-            <Home size={13} /> Met aandacht voor jouw thuis.
+            {storageError || layoutError
+              ? "Opslaan niet gelukt · controleer browseropslag"
+              : pressureLow
+                ? "Lage waterdruk · demowaarschuwing"
+                : "Alles is demo · geen echte apparatenacties"}
           </span>
-          <span>
-            Concept 01 <span>·</span> Midnight Gold
+          <span className="swipe-hint">
+            <ChevronLeft size={11} /> Swipe of kies een scherm{" "}
+            <ChevronRight size={11} />
           </span>
-        </footer>
+        </div>
       </main>
       <nav className="bottom-nav" aria-label="Hoofdnavigatie">
-        <a className="nav-item selected" href="#home" aria-current="page">
-          <Home size={21} strokeWidth={1.6} />
-          <span>Home</span>
-        </a>
-        <span className="nav-item future">
-          <LampDesk size={21} strokeWidth={1.6} />
-          <span>Kamers</span>
-          <small>Later</small>
-        </span>
-        <button className="nav-item" onClick={() => setModal("climate")}>
-          <Thermometer size={21} strokeWidth={1.6} />
-          <span>Klimaat</span>
-        </button>
-        <button
-          className="nav-item"
-          onClick={() => {
-            setDoorbell(false);
-            setModal("camera");
-          }}
-        >
-          <ShieldCheck size={21} strokeWidth={1.6} />
-          <span>Camera</span>
-        </button>
-        <span className="nav-item future">
-          <SlidersHorizontal size={21} strokeWidth={1.6} />
-          <span>Techniek</span>
-          <small>Later</small>
-        </span>
+        {pages.map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            className={`nav-item ${page === id ? "selected" : ""}`}
+            aria-current={page === id ? "page" : undefined}
+            onClick={() => navigate(id)}
+          >
+            <Icon size={21} strokeWidth={1.6} />
+            <span>{label}</span>
+            {id === "tech" && pressureLow && <i className="nav-warning" />}
+          </button>
+        ))}
       </nav>
       {toast && (
         <div className="toast" role="status">
@@ -839,11 +888,10 @@ export default function App() {
           {toast}
         </div>
       )}
-
       <dialog
         aria-labelledby="dialog-title"
         ref={dialogRef}
-        className={`detail-dialog ${modal === "camera" ? "camera-dialog" : ""}`}
+        className={`detail-dialog ${modal === "settings" ? "settings-dialog" : ""}`}
         onCancel={closeModal}
         onClick={(e) => {
           if (e.target === e.currentTarget) closeModal();
@@ -859,16 +907,18 @@ export default function App() {
               </span>
               <h2 id="dialog-title">
                 {modal === "settings"
-                  ? "Jouw thuis, jouw naam"
-                  : modal === "light"
-                    ? "Een warme sfeer"
-                    : modal === "climate"
-                      ? "Comfort in huis"
-                      : modal === "notifications"
-                        ? "Alles op een rij"
-                        : doorbell
+                  ? "Helemaal jouw dashboard"
+                  : modal === "notifications"
+                    ? "Alles op een rij"
+                    : modal === "system"
+                      ? "Je woning achter de schermen"
+                      : modal === "camera"
+                        ? doorbell
                           ? "De deurbel gaat"
-                          : "Welkom bij de voordeur"}
+                          : "Welkom bij de voordeur"
+                        : modal
+                          ? `${widgetNames[modal]} bedienen`
+                          : ""}
               </h2>
             </div>
             <button
@@ -881,10 +931,6 @@ export default function App() {
           </div>
           {modal === "settings" && (
             <>
-              <p>
-                Geef je dashboard een eigen naam. Je keuze wordt op dit apparaat
-                bewaard.
-              </p>
               <label className="text-label">
                 Naam van je woning
                 <input
@@ -899,24 +945,24 @@ export default function App() {
                   }}
                 />
               </label>
-              <div className="info-box">
-                <Settings2 size={21} />
-                <p>
-                  Dit is de eerste ontwerpversie. De uitgebreide thema- en
-                  dashboard-editor volgen na jouw beoordeling.
-                </p>
-              </div>
+              <LayoutEditor
+                settings={layout}
+                setSettings={setLayout}
+                activeProfile={profile}
+              />
               <button className="primary-button" onClick={closeModal}>
                 Klaar <Check size={16} />
               </button>
             </>
           )}
+          {(modal === "light" ||
+            modal === "shutter" ||
+            modal === "music" ||
+            modal === "climate") && (
+            <DeviceControls device={modal} {...controlProps} />
+          )}
           {modal === "light" && (
-            <>
-              <p>
-                Kies hoe warm je woonkamer aanvoelt. Alle wijzigingen zijn
-                gesimuleerd.
-              </p>
+            <div className="warmth-controls">
               <label className="slider-label" htmlFor="warmth">
                 <span>Lichtkleur</span>
                 <span>
@@ -938,12 +984,8 @@ export default function App() {
                 }
               />
               <div className="range-captions">
-                <span>
-                  <Snowflake size={14} /> Koel daglicht
-                </span>
-                <span>
-                  <Sunset size={14} /> Warm kaarslicht
-                </span>
+                <span>Koel daglicht</span>
+                <span>Warm kaarslicht</span>
               </div>
               <div
                 className="color-preview"
@@ -951,43 +993,24 @@ export default function App() {
                   background: `hsl(${40 - state.lights.warmth * 0.12} 60% ${85 - state.lights.warmth * 0.4}%)`,
                 }}
               />
-              <button className="primary-button" onClick={closeModal}>
-                Sfeer bewaren <Check size={16} />
-              </button>
-            </>
+            </div>
           )}
-          {modal === "climate" && (
-            <>
-              <p>
-                Een comfortabel begin. Deze waarden zijn voorbeelden en komen
-                niet van je ketel.
-              </p>
-              <div className="climate-details">
-                <div>
-                  <span>Kamertemperatuur</span>
-                  <strong>20,5 °C</strong>
-                </div>
-                <div>
-                  <span>Doeltemperatuur</span>
-                  <strong>{state.target.toLocaleString("nl-NL")} °C</strong>
-                </div>
-                <div>
-                  <span>CV-waterdruk · demo</span>
-                  <strong>1,2 bar</strong>
-                </div>
-                <div>
-                  <span>Voorbeeldstatus ketel</span>
-                  <strong>Normaal</strong>
-                </div>
-              </div>
-              <div className="info-box">
-                <Leaf size={21} />
-                <p>
-                  De uitgebreide klimaatpagina en instelbare drukwaarschuwingen
-                  volgen in de volgende bouwfase.
-                </p>
-              </div>
-            </>
+          {modal === "kitchen" && (
+            <div className="kitchen-control">
+              <Lightbulb size={55} strokeWidth={1} />
+              <p>Keukenverlichting · Philips Hue · demo</p>
+              <Switch
+                label="Keukenverlichting"
+                on={state.lights.kitchen}
+                onClick={() =>
+                  setState((s) => ({
+                    ...s,
+                    scene: null,
+                    lights: { ...s.lights, kitchen: !s.lights.kitchen },
+                  }))
+                }
+              />
+            </div>
           )}
           {modal === "camera" && (
             <>
@@ -998,13 +1021,10 @@ export default function App() {
                   <span>DEMO</span>
                 </span>
               </div>
-              <div className="info-box">
-                <ShieldCheck size={21} />
-                <p>
-                  Dit is een geïllustreerd voorbeeld. Er is geen liveverbinding
-                  met je Eufy-deurbel.
-                </p>
-              </div>
+              <p className="screen-note">
+                Dit is een geïllustreerd voorbeeld. Er is geen liveverbinding
+                met je Eufy-deurbel.
+              </p>
               {doorbell ? (
                 <p className="countdown" role="status">
                   Dit venster sluit over {countdown} seconden.
@@ -1016,19 +1036,56 @@ export default function App() {
               )}
             </>
           )}
+          {modal === "system" && (
+            <>
+              <div className="climate-details">
+                <div>
+                  <span>CV-waterdruk · demo</span>
+                  <strong>{pressure} bar</strong>
+                </div>
+                <div>
+                  <span>Voorbeeldstatus</span>
+                  <strong>
+                    {pressureLow ? "Lage druk gesimuleerd" : "Normaal"}
+                  </strong>
+                </div>
+                <div>
+                  <span>Apparaatkoppelingen</span>
+                  <strong>Allemaal demo</strong>
+                </div>
+                <div>
+                  <span>Webversie</span>
+                  <strong>0.2.0</strong>
+                </div>
+              </div>
+              <div className="info-box">
+                <ShieldCheck size={20} />
+                <p>
+                  Deze versie gebruikt geen echte apparaten, camerastreams of
+                  accounts. Drukwaarschuwingen zijn een simulatie; livegrenzen
+                  moeten later op je installatie worden afgestemd.
+                </p>
+              </div>
+            </>
+          )}
           {modal === "notifications" && (
             <>
               <div className="notification-entry">
                 <span className="note-icon">
-                  <Wifi size={22} />
+                  {pressureLow ? <Gauge size={22} /> : <Wifi size={22} />}
                 </span>
                 <div>
-                  <strong>Je demo staat voor je klaar</strong>
+                  <strong>
+                    {pressureLow
+                      ? "Lage waterdruk · voorbeeldmelding"
+                      : "Je woning is klaar voor jou"}
+                  </strong>
                   <p>
-                    Ontdek de scènes en probeer je apparaten. Er worden geen
-                    echte apparaten aangestuurd.
+                    {pressureLow
+                      ? "De gesimuleerde waterdruk is 0,7 bar. Dit is geen actuele ketelwaarde. Herstel de voorbeeldwaarde via Techniek."
+                      : "Je Home-overzicht past zich aan je scherm aan. Verander de dichtheid en je tegels via Instellingen."}
                   </p>
-                  <small>Alleen voorbeeldgegevens</small>
+                  <small>Alleen demogegevens</small>
                 </div>
               </div>
               <button
