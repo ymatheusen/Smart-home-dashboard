@@ -3,6 +3,7 @@ import { PositionSlider } from "./PositionSlider";
 import {
   ArrowDown,
   ArrowUp,
+  ArrowUpRight,
   Blinds,
   ChevronRight,
   Lightbulb,
@@ -514,7 +515,7 @@ export function ShellyHomeTile({
           {name}
           <small>Shelly · rolluik</small>
         </span>
-        <ChevronRight size={16} />
+        <ArrowUpRight size={16} />
       </button>
       <div className="tile-value shelly-home-value">
         <strong>

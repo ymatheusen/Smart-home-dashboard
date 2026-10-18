@@ -361,6 +361,7 @@ export function HueHomeScenes({
                 key={s.id}
                 className={`scene ${s.active && hue.available ? "active" : ""}`}
                 disabled={hue.busy || !hue.available}
+                aria-pressed={s.active && hue.available}
                 title={s.name}
                 onClick={() =>
                   void hue

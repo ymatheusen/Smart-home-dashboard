@@ -4,4 +4,4 @@ export const isNativeAndroid =
   Capacitor.isNativePlatform() && Capacitor.getPlatform() === "android";
 export const HueBridge = registerPlugin<HueTransport>("HueBridge");
 export const androidDownloadUrl =
-  "https://raw.githubusercontent.com/ymatheusen/Smart-home-dashboard/refs/heads/gh-pages/android/Mijn-Woning.apk";
+  "https://ymatheusen.github.io/Smart-home-dashboard/android/Mijn-Woning-0.5.2.apk";
