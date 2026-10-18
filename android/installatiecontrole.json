@@ -1,0 +1,8 @@
+{
+  "package": "nl.mijnwoning.installcheck",
+  "version": "1.0",
+  "apkSha256": "9eb534bb92df4e039c9ae29d16c93118a0854ad36d8864b0f384aa6b314fba31",
+  "bundledApkVersion": "0.5.2",
+  "bundledApkSha256": "5b36c849d8639f621c45b3f37810bdf765ef51c5073270aa3e6eaa077b4f0cb3",
+  "internetPermission": false
+}
