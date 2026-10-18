@@ -52,6 +52,12 @@ import { LayoutEditor } from "./components/LayoutEditor";
 import { PwaControls, PwaUpdateNotice } from "./pwa/PwaControls";
 import { usePwa } from "./pwa/PwaProvider";
 import { useHue } from "./hue/HueProvider";
+import { useShelly } from "./shelly/ShellyProvider";
+import {
+  ShellySetup,
+  ShellyDevices,
+  ShellyHomeTile,
+} from "./shelly/ShellyControls";
 import { HueSetup, HueHomeScenes, HueLights } from "./hue/HueControls";
 const pages = [
   {
@@ -107,6 +113,16 @@ const sceneList = [
 export default function App() {
   const { online } = usePwa();
   const hue = useHue();
+  const shelly = useShelly();
+  const realLights = hue.live || shelly.live;
+  const localSummary = [
+    hue.live ? `Hue ${hue.available ? "live" : "niet bereikbaar"}` : "",
+    shelly.live
+      ? `Shelly ${shelly.devices.filter((d) => d.available).length}/${shelly.devices.length}`
+      : "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
   const [state, setState] = useState(loadState);
   const [layout, setLayout] = useState(loadLayout);
   const [layoutError, setLayoutError] = useState(false);
@@ -323,8 +339,25 @@ export default function App() {
     kitchen: LampDesk,
   };
   const tile = (id: WidgetId) => {
-    if (hue.live && (id === "light" || id === "kitchen")) {
-      const lights = hue.snapshot?.lights || [];
+    if (shelly.live && id === "shutter")
+      return (
+        <ShellyHomeTile
+          key={id}
+          onOpen={() => setModal("shutter")}
+          onMessage={notify}
+        />
+      );
+    if (realLights && (id === "light" || id === "kitchen")) {
+      const lights = hue.live ? hue.snapshot?.lights || [] : [];
+      const shellyLights = shelly.live
+        ? shelly.devices.flatMap((d) =>
+            d.channels
+              .filter((c) => c.kind === "switch")
+              .map((c) => ({ ...c, available: d.available })),
+          )
+        : [];
+      const available =
+        (hue.live && hue.available) || shellyLights.some((c) => c.available);
       return (
         <article className="home-tile tile-light" key={id}>
           <button
@@ -336,22 +369,30 @@ export default function App() {
               <Lightbulb size={21} />
             </span>
             <span>
-              {id === "light" ? "Verlichting" : "Hue-kamers"}
+              {id === "light" ? "Verlichting" : "Alle lampen"}
               <small>
-                Hue · {hue.available ? "lokaal live" : "niet bereikbaar"}
+                {[hue.live ? "Hue" : "", shelly.live ? "Shelly" : ""]
+                  .filter(Boolean)
+                  .join(" & ")}{" "}
+                · lokaal
               </small>
             </span>
             <ArrowUpRight size={16} />
           </button>
           <div className="tile-value">
             <strong>
-              {hue.available
-                ? lights.filter((l) => l.on && l.reachable).length
+              {available
+                ? (hue.available
+                    ? lights.filter((l) => l.on && l.reachable).length
+                    : 0) +
+                  shellyLights.filter((c) => c.available && c.on).length
                 : "–"}
-              <small> / {lights.length}</small>
+              <small> / {lights.length + shellyLights.length}</small>
             </strong>
             <span>
-              {hue.available ? "Hue-lampen aan" : "Stand niet actueel"}
+              {available
+                ? "Lampen aan · bereikbare modules"
+                : "Stand niet actueel"}
             </span>
           </div>
           <div className="tile-actions">
@@ -613,10 +654,8 @@ export default function App() {
         <div className="header-actions">
           <span className="connection">
             <span />{" "}
-            {hue.live
-              ? hue.available
-                ? "Hue live · rest demo"
-                : "Hue niet bereikbaar"
+            {localSummary
+              ? `${localSummary} · rest demo`
               : online
                 ? "Demo actief"
                 : "Offline · demo"}
@@ -763,8 +802,8 @@ export default function App() {
             <div className="screen-title">
               <div>
                 <span className="eyebrow">
-                  {hue.live
-                    ? "HUE LOKAAL · OVERIGE DEMO"
+                  {localSummary
+                    ? "LOKAAL VERBONDEN · OVERIGE DEMO"
                     : "MIJN WONING · DEMO"}
                 </span>
                 <h1>{pages.find((p) => p.id === page)?.heading}</h1>
@@ -772,7 +811,7 @@ export default function App() {
               </div>
               {page === "rooms" && (
                 <span className="room-badge">
-                  {hue.live ? "Alle apparaten" : "Woonkamer & keuken"}
+                  {localSummary ? "Alle apparaten" : "Woonkamer & keuken"}
                 </span>
               )}
             </div>
@@ -873,7 +912,9 @@ export default function App() {
                     },
                     {
                       title: "Shelly",
-                      sub: `Rolluik ${state.shutter}% geopend`,
+                      sub: shelly.live
+                        ? `${shelly.devices.filter((d) => d.available).length} van ${shelly.devices.length} modules bereikbaar`
+                        : `Rolluik ${state.shutter}% geopend · demo`,
                       icon: Blinds,
                     },
                     {
@@ -899,7 +940,12 @@ export default function App() {
                         <strong>{title}</strong>
                         <small>{sub}</small>
                       </span>
-                      <span className="tiny-label">DEMO</span>
+                      <span className="tiny-label">
+                        {(title === "Philips Hue" && hue.live) ||
+                        (title === "Shelly" && shelly.live)
+                          ? "LOKAAL"
+                          : "DEMO"}
+                      </span>
                       <ChevronRight size={15} />
                     </button>
                   ))}
@@ -928,10 +974,8 @@ export default function App() {
           <span>
             {storageError || layoutError
               ? "Opslaan niet gelukt · controleer browseropslag"
-              : hue.live
-                ? hue.available
-                  ? "Hue lokaal live · overige apparaten demo"
-                  : "Hue niet bereikbaar · bediening geblokkeerd"
+              : localSummary
+                ? `${localSummary} · overige apparaten demo`
                 : pressureLow
                   ? "Lage waterdruk · demowaarschuwing"
                   : !online
@@ -979,8 +1023,10 @@ export default function App() {
               <span className="eyebrow">
                 {doorbell
                   ? "ER STAAT IEMAND VOOR DE DEUR"
-                  : hue.live && (modal === "light" || modal === "kitchen")
-                    ? "HUE LOKAAL · LIVE"
+                  : (realLights &&
+                        (modal === "light" || modal === "kitchen")) ||
+                      (shelly.live && modal === "shutter")
+                    ? "LOKALE APPARAATBEDIENING"
                     : "MIJN WONING · DEMO"}
               </span>
               <h2 id="dialog-title">
@@ -1011,6 +1057,7 @@ export default function App() {
             <>
               <PwaControls />
               <HueSetup />
+              <ShellySetup />
               <label className="text-label">
                 Naam van je woning
                 <input
@@ -1035,13 +1082,13 @@ export default function App() {
               </button>
             </>
           )}
-          {((modal === "light" && !hue.live) ||
-            modal === "shutter" ||
+          {((modal === "light" && !realLights) ||
+            (modal === "shutter" && !shelly.live) ||
             modal === "music" ||
             modal === "climate") && (
             <DeviceControls device={modal} {...controlProps} />
           )}
-          {modal === "light" && !hue.live && (
+          {modal === "light" && !realLights && (
             <div className="warmth-controls">
               <label className="slider-label" htmlFor="warmth">
                 <span>Lichtkleur</span>
@@ -1075,7 +1122,7 @@ export default function App() {
               />
             </div>
           )}
-          {modal === "kitchen" && !hue.live && (
+          {modal === "kitchen" && !realLights && (
             <div className="kitchen-control">
               <Lightbulb size={55} strokeWidth={1} />
               <p>Keukenverlichting · Philips Hue · demo</p>
@@ -1094,6 +1141,12 @@ export default function App() {
           )}
           {hue.live && (modal === "light" || modal === "kitchen") && (
             <HueLights onMessage={notify} />
+          )}
+          {shelly.live && (modal === "light" || modal === "kitchen") && (
+            <ShellyDevices kind="switch" onMessage={notify} />
+          )}
+          {shelly.live && modal === "shutter" && (
+            <ShellyDevices kind="cover" onMessage={notify} />
           )}
           {modal === "camera" && (
             <>
@@ -1135,7 +1188,9 @@ export default function App() {
                 <div>
                   <span>Apparaatkoppelingen</span>
                   <strong>
-                    {hue.live ? "Hue lokaal · overige demo" : "Allemaal demo"}
+                    {localSummary
+                      ? `${localSummary} · overige demo`
+                      : "Allemaal demo"}
                   </strong>
                 </div>
                 <div>
@@ -1146,8 +1201,8 @@ export default function App() {
               <div className="info-box">
                 <ShieldCheck size={20} />
                 <p>
-                  {hue.live
-                    ? "Hue is lokaal gekoppeld. De overige apparaten en camerabeelden zijn voorbeelden."
+                  {localSummary
+                    ? "Je gekoppelde Hue- en Shelly-apparaten worden lokaal bediend. De overige apparaten en camerabeelden zijn voorbeelden."
                     : "Deze versie gebruikt geen echte apparaten, camerastreams of accounts."}{" "}
                   Drukwaarschuwingen zijn een simulatie; livegrenzen moeten
                   later op je installatie worden afgestemd.

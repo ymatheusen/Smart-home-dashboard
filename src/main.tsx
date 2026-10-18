@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import { HueProvider } from "./hue/HueProvider";
+import { ShellyProvider } from "./shelly/ShellyProvider";
 import { PwaProvider } from "./pwa/PwaProvider";
 import { AppErrorBoundary } from "./components/AppErrorBoundary";
 import "@fontsource/dm-sans/latin-400.css";
@@ -17,9 +18,11 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <PwaProvider>
       <HueProvider>
-        <AppErrorBoundary>
-          <App />
-        </AppErrorBoundary>
+        <ShellyProvider>
+          <AppErrorBoundary>
+            <App />
+          </AppErrorBoundary>
+        </ShellyProvider>
       </HueProvider>
     </PwaProvider>
   </React.StrictMode>,

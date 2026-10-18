@@ -1,8 +1,8 @@
-# Mijn Woning voor Android · lokale Hue-koppeling
+# Mijn Woning voor Android · lokale Hue- en Shelly-koppeling
 
 ## Installeren en koppelen
 
-1. Download `https://github.com/ymatheusen/Smart-home-dashboard/raw/refs/heads/gh-pages/android/Mijn-Woning.apk` op je Android-telefoon of tablet. De downloadpagina staat op `/Smart-home-dashboard/android/`.
+1. Download `https://raw.githubusercontent.com/ymatheusen/Smart-home-dashboard/refs/heads/gh-pages/android/Mijn-Woning.apk` op je Android-telefoon of tablet. De downloadpagina staat op `/Smart-home-dashboard/android/`.
 2. Open de APK. Android kan vragen of je browser deze app mag installeren. De app wordt handmatig geïnstalleerd en staat niet in de Play Store. Beveiligingscontroles hoeven niet uitgeschakeld te worden.
 3. Open het nieuw geïnstalleerde Android-icoon **Mijn Woning**. De eerdere browser-PWA kan daarnaast blijven bestaan; die heeft geen native Hue-koppeling. Browserinstellingen worden niet automatisch naar de Android-app overgezet.
 4. Verbind het toestel met hetzelfde thuisnetwerk als de Hue Bridge. Open **Instellingen** en de kaart **Philips Hue**.
@@ -22,6 +22,32 @@ In Live-modus tonen de snelknoppen je eigen favorieten met kamer- of zonenaam. E
 Tik op de verlichtingstegel voor de lijst met lampen en kamerfilter. Je kunt lampen schakelen en ondersteunde helderheid, wittemperatuur of kleur instellen. Met **Behouden** blijft de bestaande lichtkleur ongemoeid wanneer je alleen de helderheid toepast. De Bridge kan kleuren aanpassen aan het kleurbereik van de lamp.
 
 Een geslaagde opdracht betekent dat de Bridge de opdracht bevestigd heeft. De fysieke reactie van alle lampen moet thuis worden gecontroleerd. Onbereikbare lampen en een onbereikbare Bridge worden niet als succesvol bediend getoond. De overige integraties blijven demo. Demo-modus verstuurt geen licht- of scèneopdrachten.
+
+## Shelly Plus 2PM koppelen · versie 0.5
+
+Installeer de nieuwe APK **over de bestaande Android-app heen**, met dezelfde ondertekeningssleutel. Verwijder de app niet: zo blijven de Hue-koppeling, Hue-favorieten en dashboardindeling behouden.
+
+1. Verbind met het thuisnetwerk. Open **Instellingen → Shelly Plus 2PM**.
+2. Zoek het lokale IP-adres in de Shelly-app bij de apparaatinformatie. Vul een herkenbare naam en het IP-adres in. Voor deze installatie zijn er drie modules: twee rolluikmodules en één lichtmodule met twee kanalen.
+3. Laat het wachtwoordvak uit als lokale authenticatie niet aanstaat. Als de module een wachtwoord vraagt, vink je het aan en vul je het **lokale** Shelly-wachtwoord in; gebruikersnaam is `admin`. Je Shelly-cloudaccount is niet nodig.
+4. Tik op **Shelly controleren en toevoegen**. Alleen apparaatidentiteit, profiel, configuratie en status worden gelezen. Toevoegen verplaatst geen rolluik en schakelt geen lamp.
+5. Herhaal voor de andere modules. De app herkent Gen 2 Plus2PM in het bestaande `cover`- of `switch`-profiel. Hij verandert geen profiel, bedrading, beveiligingen, kalibratie of apparaatconfiguratie.
+6. Open **Verlichting** voor Hue-lampen en de twee afzonderlijke Shelly-lichtkanalen. De Plus 2PM is een schakelmodule en ondersteunt geen dimmen. Kanaalnamen stel je in de Shelly-app in; anders toont de app de modulenaam met lamp 1 en lamp 2.
+7. Open **Rolluiken** voor beide rolluiken. De Home-tegel biedt een keuzelijst plus open/stop/sluit voor het geselecteerde rolluik. Staat de tegel op een volgende tegelpagina, gebruik dan de pijlen of zet hem via **Indeling** vooraan. Bestaande indelingsvoorkeuren worden behouden.
+
+Procentbediening is alleen zichtbaar wanneer de module `pos_control: true` meldt. 0% betekent gesloten, 100% geopend. De getoonde stand komt van `current_pos`, geen animatie of geschatte looptijd. Kalibreren blijft een handeling in de Shelly-app. Een foutmelding of lopende kalibratie blokkeert bewegingen behalve Stop. Stop blijft ook na een mislukte uitlezing beschikbaar, maar vereist een bereikbare module om effect te hebben.
+
+De status wordt ongeveer elke drie seconden ververst terwijl de app zichtbaar en Shelly Live actief is. Een onbereikbare module toont geen actuele stand en blokkeert gewone opdrachten; de andere modules blijven bruikbaar. Opdrachten worden per module in volgorde afgehandeld, zodat een stopopdracht niet door een eerdere openingsopdracht kan worden ingehaald. Een bevestiging betekent dat de module de opdracht heeft geaccepteerd; de fysieke stand wordt afzonderlijk uitgelezen. Bij een netwerkfout herhaalt de app een opdracht niet zelf. Alleen een uitdrukkelijke authenticatie-afwijzing kan één digest-authenticatiepoging veroorzaken.
+
+Bij een gewijzigd IP-adres of wachtwoord voeg je dezelfde module opnieuw toe; de oorspronkelijke module-ID voorkomt een dubbele koppeling. **Koppeling verwijderen** wist alleen die module uit de app. Hue blijft apart opgeslagen. Shelly Demo verstuurt geen apparaatopdrachten; Hue Demo/Live werkt onafhankelijk. Hue-scènes activeren alleen Hue-apparaten en sturen geen Shelly-rolluiken of lampen aan.
+
+### Lokale Shelly-verbinding
+
+De Plus 2PM gebruikt de lokale HTTP-API op poort 80. Daarom staat Android HTTP-verkeer voor de native module toe. De ingebouwde WebView blijft op `https://localhost` met `allowMixedContent: false`. De native Shelly-module accepteert alleen privé-IPv4-adressen, vaste API-paden en een beperkte lijst opdrachten; geen hostnamen, willekeurige URLs, redirects, proxy of cloudverkeer. De apparaat-ID, generatie en het actuele profiel worden voor bediening opnieuw gecontroleerd. Deze HTTP-identiteit is geen cryptografisch certificaat: gebruik het eigen vertrouwde thuisnetwerk. De bestaande Hue-verbinding blijft HTTPS met dezelfde certificaatcontrole.
+
+Bij ingeschakelde lokale authenticatie ondersteunt de module SHA-256 Digest via de HTTP-challenge of de Shelly RPC-challenge. Er is geen Basic-authenticatie en het wachtwoord wordt niet als platte tekst in HTTP-verzoeken verstuurd. De lokale wachtwoorden staan AES-256-GCM-versleuteld in private Android-opslag met een eigen, niet-exporteerbare Keystore-sleutel. Het wachtwoordveld wordt na toevoegen gewist; native resultaten geven geen wachtwoorden of volledige apparaatconfiguratie terug. Hue-gegevens en Shelly-gegevens gebruiken afzonderlijke opslag en sleutels.
+
+Referentie voor Gen 2 RPC, status en profiel: https://shelly-api-docs.shelly.cloud/gen2/ . De HTTP- en RPC-authenticatie zijn tevens vergeleken met Home Assistant aioshelly; er is geen code uit die bibliotheek overgenomen. De integratie is gecontroleerd met JVM-tests voor profielen, kalibratie, kanalen, digest, fouten en HTTP-verzoeken, plus een browserflow met drie gesimuleerde modules. De werkelijke wifi-verbinding en fysieke rolluiken/lampen moeten thuis worden getest.
 
 ## Beveiliging en opslag
 

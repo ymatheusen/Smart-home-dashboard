@@ -28,8 +28,9 @@ export function PwaControls() {
           <span className="pwa-version">v{__APP_VERSION__}</span>
         </div>
         <p className="pwa-demo-note">
-          Hue kan lokaal live worden gekoppeld. De overige integraties blijven
-          demo. Een nieuwe APK installeer je over deze versie heen.
+          Hue en Shelly kunnen lokaal live worden gekoppeld. De overige
+          integraties blijven demo. Een nieuwe APK installeer je over deze
+          versie heen.
         </p>
       </section>
     );

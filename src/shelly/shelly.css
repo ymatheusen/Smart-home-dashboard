@@ -1,0 +1,92 @@
+.shelly-saved {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 0;
+  border-bottom: 1px solid #ffffff12;
+}
+.shelly-saved > div:first-child {
+  flex: 1;
+  min-width: 0;
+}
+.shelly-saved strong {
+  font-size: 12px;
+  font-weight: 500;
+}
+.shelly-saved small {
+  display: block;
+  color: #9aaa8a;
+  font-size: 10px;
+  margin-top: 6px;
+  overflow-wrap: anywhere;
+}
+.shelly-remove {
+  width: 100%;
+  font-size: 11px;
+  color: #becbad;
+}
+.shelly-password {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 18px;
+  font-size: 11px;
+  color: #becbad;
+}
+.shelly-password input {
+  accent-color: var(--gold);
+  width: 17px;
+  height: 17px;
+}
+.shelly-cover-actions {
+  display: flex;
+  gap: 8px;
+  margin: 18px 0 8px;
+}
+.shelly-cover-actions button {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  min-height: 44px;
+  border: 1px solid #d6b87a33;
+  border-radius: 10px;
+  background: #d6b87a09;
+  color: var(--gold);
+  font-size: 11px;
+}
+.tile-value.shelly-home-value {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-content: center;
+  align-items: center;
+  gap: 6px;
+}
+.shelly-home-value select {
+  width: 100%;
+  min-width: 0;
+  min-height: 32px;
+  color: #c6d2b6;
+  background: #20251b;
+  border: 1px solid #ffffff15;
+  border-radius: 7px;
+  padding: 4px;
+  font-size: 10px;
+  text-overflow: ellipsis;
+}
+.shelly-home-value > span {
+  grid-column: 1 / -1;
+}
+.home-tile .tile-value.shelly-home-value strong {
+  font-size: clamp(22px, 3vw, 44px);
+}
+.home-tile .tile-value.shelly-home-value strong small {
+  font-size: 10px;
+}
+@media (max-width: 699px) {
+  .shelly-home-value select {
+    font-size: 8px;
+  }
+}
