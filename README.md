@@ -53,4 +53,8 @@ De broncode wordt aangeboden op de branch `codex/mijn-woning-demo`. De publiceer
 
 De verwachte URL na succesvolle activering is `https://ymatheusen.github.io/Smart-home-dashboard/`. Het inschakelen vereist repositorybeheerrechten. GitHub Pages-beschikbaarheid voor private repositories hangt af van het GitHub-abonnement; maak een repository niet zomaar openbaar.
 
-De `gh-pages`-branch bevat alleen de zelfstandige demo en `.nojekyll`; ververs deze na een nieuwe `npm run build:standalone`. Publicatie van de Codex-cloudomgeving staat los van websitehosting.
+De `gh-pages`-branch bevat de gebouwde bestanden uit `dist`, `.nojekyll` en een downloadbare zelfstandige demo in `download/Mijn-Woning.html`. Publiceer uitsluitend deze branch. De broncodebranch bevat een Vite-ontwikkelbestand en kan niet rechtstreeks als Pages-website worden geserveerd. Publicatie van de Codex-cloudomgeving staat los van websitehosting.
+
+## Productiecontrole
+
+`PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm run test:production` bouwt de app en controleert de echte productiebestanden onder `/Smart-home-dashboard/`, inclusief bediening en een zichtbare melding bij geblokkeerd JavaScript. Zonder bestaande Chromium-installatie: `npx playwright install chromium` en `npm run test:production`.
