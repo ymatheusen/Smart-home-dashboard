@@ -1,0 +1,9 @@
+{
+  "version": "0.5.1",
+  "apkSha256": "1d7637125e1dd44ae46b89998edeeeb6a2973479a53e9e3ad9e8949e5c45dfde",
+  "certificateSha256": "f9f4e31e125e5e438d86dbdaf09df088dc4c943bc3396a77d9855cf6e4de9918",
+  "sourceCommit": "8d1cfccc124a764e421f061e7ea0a5a67595b338",
+  "freshInstallRequiredFromVersion": "0.5.0",
+  "previousCertificateSha256": "3d79d7119e38be94cd30c3cef2bc25a7b12cd9e6e19cd7134365ddd14a22a616",
+  "nativeUnitTests": 13
+}
