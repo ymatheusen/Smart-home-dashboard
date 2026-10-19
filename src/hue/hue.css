@@ -354,3 +354,41 @@
     height: 22px;
   }
 }
+
+.hue-scene-option {
+  min-width: 0;
+  border-bottom: 1px solid #ffffff12;
+}
+.hue-icon-picker {
+  padding: 0 8px 10px;
+  color: var(--gold);
+  font-size: 11px;
+}
+.hue-icon-picker summary {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+}
+.hue-icon-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+.hue-icon-grid button {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 5px;
+  min-height: 60px;
+  border: 1px solid #d6b87a33;
+  border-radius: 9px;
+  background: #d6b87a09;
+  color: var(--gold);
+  font-size: 10px;
+}
+.hue-icon-grid button[aria-pressed="true"] {
+  background: #d6b87a30;
+  border-color: var(--gold);
+}

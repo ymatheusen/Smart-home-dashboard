@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { PositionSlider } from "./PositionSlider";
 import {
   ArrowDown,
   ArrowUp,
+  ArrowUpRight,
   Blinds,
   ChevronRight,
   Lightbulb,
@@ -19,6 +21,56 @@ import {
 import { androidDownloadUrl } from "../hue/native";
 import "../hue/hue.css";
 import "./shelly.css";
+
+function NameEditor({
+  name,
+  label,
+  onSave,
+}: {
+  name: string;
+  label: string;
+  onSave(name: string): void;
+}) {
+  const [draft, setDraft] = useState(name),
+    [error, setError] = useState("");
+  return (
+    <form
+      className="shelly-name-editor"
+      onSubmit={(e) => {
+        e.preventDefault();
+        try {
+          onSave(draft);
+          setError("");
+        } catch (e) {
+          setError((e as Error).message);
+        }
+      }}
+    >
+      <label className="text-label">
+        {label}
+        <input
+          aria-label={label}
+          required
+          maxLength={60}
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+        />
+      </label>
+      <button
+        className="hue-secondary"
+        type="submit"
+        disabled={draft.trim() === name}
+      >
+        Naam opslaan
+      </button>
+      {error && (
+        <p className="hue-error" role="status">
+          {error}
+        </p>
+      )}
+    </form>
+  );
+}
 
 export function ShellySetup() {
   const shelly = useShelly();
@@ -104,6 +156,26 @@ export function ShellySetup() {
               >
                 <Trash2 size={16} />
               </button>
+              <details className="shelly-names">
+                <summary>Namen aanpassen</summary>
+                <p className="hue-footnote">
+                  Deze namen worden op dit apparaat bewaard.
+                </p>
+                <NameEditor
+                  key={`module:${d.name}`}
+                  name={d.name}
+                  label={`Naam module · ${d.name}`}
+                  onSave={(name) => shelly.rename(d.id, name)}
+                />
+                {d.channels.map((c) => (
+                  <NameEditor
+                    key={`${c.id}:${c.name}`}
+                    name={c.name}
+                    label={`Naam kanaal ${c.id + 1} · ${d.name}`}
+                    onSave={(name) => shelly.rename(d.id, name, c.id)}
+                  />
+                ))}
+              </details>
               {remove === d.id && (
                 <div className="shelly-remove">
                   <p>
@@ -207,8 +279,9 @@ export function ShellySetup() {
           </form>
           <p className="hue-footnote">
             De Plus 2PM schakelt verlichting aan en uit; hij kan niet dimmen.
-            Kanaalnamen en rolluikkalibratie beheer je in de Shelly-app. Voeg
-            bij een gewijzigd IP-adres dezelfde module opnieuw toe.
+            Namen pas je hierboven aan; rolluikkalibratie beheer je in de
+            Shelly-app. Voeg bij een gewijzigd IP-adres dezelfde module opnieuw
+            toe.
           </p>
           <p className="hue-footnote">
             Deze Shelly-koppeling gebruikt de lokale HTTP-API op je
@@ -235,8 +308,7 @@ function Channel({
   channel: ShellyChannel;
   onMessage(message: string): void;
 }) {
-  const shelly = useShelly(),
-    [position, setPosition] = useState<number | null>(null);
+  const shelly = useShelly();
   const pending = shelly.pending.includes(device.id),
     disabled =
       shelly.busy ||
@@ -317,30 +389,12 @@ function Channel({
             </button>
           </div>
           {channel.calibrated ? (
-            <>
-              <label className="hue-slider">
-                Gewenste opening · {channel.name}
-                <span>{position ?? channel.position ?? 50}%</span>
-                <input
-                  type="range"
-                  min={0}
-                  max={100}
-                  value={position ?? channel.position ?? 50}
-                  disabled={disabled}
-                  onChange={(e) => setPosition(Number(e.target.value))}
-                />
-              </label>
-              <button
-                className="hue-secondary"
-                disabled={disabled || position === null}
-                onClick={() => {
-                  if (position !== null)
-                    void run({ action: "position", position });
-                }}
-              >
-                Rolluikpositie toepassen
-              </button>
-            </>
+            <PositionSlider
+              name={channel.name}
+              value={channel.position}
+              disabled={disabled}
+              onCommit={(position) => run({ action: "position", position })}
+            />
           ) : (
             <p className="hue-footnote">
               Procentbediening is beschikbaar na kalibratie in de Shelly-app.
@@ -420,100 +474,92 @@ export function ShellyDevices({
 }
 
 export function ShellyHomeTile({
+  device,
   onOpen,
   onMessage,
 }: {
+  device?: ShellyDevice;
   onOpen(): void;
   onMessage(message: string): void;
 }) {
-  const shelly = useShelly(),
-    [selected, setSelected] = useState("");
-  const covers = shelly.devices.filter((d) => d.profile === "cover"),
-    device = covers.find((d) => d.id === selected) || covers[0],
-    channel = device?.channels[0];
+  const shelly = useShelly();
+  const channel = device?.channels[0];
+  const name = channel?.name || device?.name || "Rolluiken";
   const disabled =
     !device?.available ||
     !channel ||
     channel.fault ||
     channel.state === "calibrating" ||
     shelly.busy ||
-    shelly.pending.includes(device?.id || "");
-  const run = async (action: "open" | "close" | "stop") => {
+    shelly.pending.includes(device.id);
+  const run = async (command: Omit<ShellyCommand, "id" | "channel">) => {
     if (!device || !channel) return;
     try {
-      await shelly.command({ id: device.id, channel: channel.id, action });
+      await shelly.command({ ...command, id: device.id, channel: channel.id });
       onMessage("Shelly heeft de opdracht bevestigd.");
     } catch (e) {
       onMessage((e as Error).message);
     }
   };
   return (
-    <article className="home-tile tile-shutter">
+    <article className="home-tile tile-shutter" aria-label={name}>
       <button
         className="tile-open"
-        aria-label="Rolluiken bedienen"
+        aria-label={`${name} bedienen`}
         onClick={onOpen}
       >
         <span className="device-icon">
           <Blinds size={21} />
         </span>
         <span>
-          Rolluiken<small>Shelly · {covers.length} modules</small>
+          {name}
+          <small>Shelly · rolluik</small>
         </span>
-        <ChevronRight size={16} />
+        <ArrowUpRight size={16} />
       </button>
       <div className="tile-value shelly-home-value">
         <strong>
-          {device?.available &&
-          channel?.position !== null &&
-          channel?.position !== undefined
+          {device?.available && channel?.position != null
             ? channel.position
             : "–"}
           <small>%</small>
         </strong>
-        <select
-          aria-label="Rolluik op Home"
-          value={device?.id || ""}
-          onChange={(e) => setSelected(e.target.value)}
-        >
-          {covers.length ? (
-            covers.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.name}
-              </option>
-            ))
-          ) : (
-            <option value="">Geen rolluik gekoppeld</option>
-          )}
-        </select>
         <span>
           {device?.available
             ? coverState(channel?.state)
             : "Stand niet actueel"}
         </span>
       </div>
+      {channel?.calibrated && (
+        <PositionSlider
+          name={name}
+          value={channel.position}
+          disabled={disabled}
+          onCommit={(position) => run({ action: "position", position })}
+        />
+      )}
       <div className="tile-actions">
         <button
           className="tile-control"
-          aria-label="Rolluik openen"
+          aria-label={`${name} openen`}
           disabled={disabled}
-          onClick={() => void run("open")}
+          onClick={() => void run({ action: "open" })}
         >
           <ArrowUp size={17} />
         </button>
         <button
           className="tile-control"
-          aria-label="Rolluik stoppen"
+          aria-label={`${name} stoppen`}
           disabled={!channel || shelly.busy}
-          onClick={() => void run("stop")}
+          onClick={() => void run({ action: "stop" })}
         >
           <Square size={12} />
         </button>
         <button
           className="tile-control"
-          aria-label="Rolluik sluiten"
+          aria-label={`${name} sluiten`}
           disabled={disabled}
-          onClick={() => void run("close")}
+          onClick={() => void run({ action: "close" })}
         >
           <ArrowDown size={17} />
         </button>

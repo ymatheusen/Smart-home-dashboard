@@ -33,7 +33,9 @@ public final class ShellyPolicy {
             JSONObject source = status.optJSONObject(key);
             if (source == null || source.optInt("id", -1) != index) throw new IllegalStateException("SHELLY_RESPONSE");
             JSONObject settings = config.optJSONObject(key);
-            String name = settings == null ? "" : settings.optString("name", "");
+            Object rawName = settings == null ? null : settings.opt("name");
+            String name = rawName instanceof String ? ((String) rawName).trim() : "";
+            if ("null".equalsIgnoreCase(name) || "undefined".equalsIgnoreCase(name)) name = "";
             if (name.isEmpty()) name = "cover".equals(profile) ? label : label + " · lamp " + (index + 1);
             JSONObject channel = new JSONObject().put("id", index).put("kind", profile).put("name", name);
             JSONArray errors = source.optJSONArray("errors");

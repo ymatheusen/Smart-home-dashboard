@@ -6,13 +6,17 @@ Een persoonlijk smart-homedashboard in Midnight Gold, ontworpen voor een Android
 
 De gepubliceerde demo staat op **https://ymatheusen.github.io/Smart-home-dashboard/**. GitHub Pages gebruikt de branch `gh-pages`, map `/ (root)`. De broncode staat op `codex/mijn-woning-demo`; deze branch kan niet rechtstreeks als website worden gepubliceerd.
 
-## Android-app met lokale Hue en Shelly · versie 0.5
+## Android-app met lokale Hue en Shelly · versie 0.5.3
 
-**APK-download:** https://raw.githubusercontent.com/ymatheusen/Smart-home-dashboard/refs/heads/gh-pages/android/Mijn-Woning.apk
+**APK-download (0.5.3):** https://ymatheusen.github.io/Smart-home-dashboard/android/Mijn-Woning-0.5.3.apk
+
+**Bijwerken vanaf 0.5.1:** installeer 0.5.3 over de bestaande app heen. Dezelfde ondertekeningssleutel wordt gebruikt, zodat koppelingen en instellingen behouden blijven. Alleen bij overstappen vanaf de oudere 0.5.0-app met een andere sleutel moet je eerst verwijderen en opnieuw koppelen. Oudere APK-downloads blijven beschikbaar.
 
 De aparte Android-app behoudt het dashboard en kan rechtstreeks op je thuisnetwerk met een Hue Bridge verbinden. Je hebt geen Home Assistant, Hue-ontwikkelaarsaccount of cloudbackend nodig. Koppelen gebeurt in Instellingen via het Bridge-IP en de fysieke koppelknop. De sleutel blijft versleuteld in native app-opslag met Android Keystore.
 
 Je maakt en bewerkt scènes in de Hue-app. De Android-app haalt opgeslagen scènes op, laat je favorieten kiezen en activeert de oorspronkelijke Hue-scène. Lichtbediening ondersteunt aan/uit, helderheid en waar beschikbaar wittemperatuur en kleur. Hue en Shelly hebben elk een eigen Demo/Live-keuze. De Plus 2PM wordt in zijn bestaande profiel herkend: één rolluik of twee afzonderlijke schakelaars. Rolluiken ondersteunen open, stop en sluit, en procentbediening na kalibratie in de Shelly-app. De twee lichtkanalen ondersteunen aan/uit.
+
+Versie 0.5.3 is een schone herbouw met expliciete APK-v1-, v2- en v3-ondertekening, dezelfde sleutel en een hoger versienummer. Dit garandeert nog geen oplossing voor de Xiaomi-installatiemelding. De vormgeving uit 0.5.2 geeft het dashboard een warme, fotografische uitstraling: donkere glastegels, gouden actieve scènes, een zwevende navigatiebalk, albumillustratie en subtiele overgangen. De beelden zijn lokaal meegeleverd en offline beschikbaar. Minder beweging in de systeeminstellingen schakelt animaties uit. Alle bediening uit 0.5.1 blijft beschikbaar: aparte rolluiktegels, positiebediening bij loslaten, eigen Shelly-namen en instelbare Hue-scène-iconen zonder kamerlabel. Bewaar de ondertekeningssleutel en het configuratiebestand privé voor volgende updates.
 
 Zie **[Android installeren, koppelen en bouwen](docs/ANDROID.md)** voor instructies, beveiliging, testresultaten en de nog benodigde thuistest. De browser-PWA blijft beschikbaar en toont een downloadlink naar de Android-app.
 

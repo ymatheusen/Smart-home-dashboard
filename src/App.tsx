@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import {
   ArrowDown,
   ArrowUp,
@@ -308,7 +308,13 @@ export default function App() {
   const visibleWidgets = layout[profile].order.filter(
     (id) => !layout[profile].hidden.includes(id),
   );
-  const displayedWidgets = page === "rooms" ? widgetIds : visibleWidgets;
+  const displayedWidgets = (
+    page === "rooms" ? widgetIds : visibleWidgets
+  ).flatMap<WidgetId | `shutter:${string}`>((id) => {
+    if (id !== "shutter" || !shelly.live) return [id];
+    const covers = shelly.devices.filter((d) => d.profile === "cover");
+    return covers.length ? covers.map((d) => `shutter:${d.id}` as const) : [id];
+  });
   const pageCount = Math.max(1, Math.ceil(displayedWidgets.length / capacity));
   const safeTilePage = Math.min(tilePage, pageCount - 1);
   const tileIds = displayedWidgets.slice(
@@ -338,15 +344,17 @@ export default function App() {
     camera: DoorOpen,
     kitchen: LampDesk,
   };
-  const tile = (id: WidgetId) => {
-    if (shelly.live && id === "shutter")
+  const tile = (tileId: WidgetId | `shutter:${string}`) => {
+    if (shelly.live && (tileId === "shutter" || tileId.startsWith("shutter:")))
       return (
         <ShellyHomeTile
-          key={id}
+          key={tileId}
+          device={shelly.devices.find((d) => tileId === `shutter:${d.id}`)}
           onOpen={() => setModal("shutter")}
           onMessage={notify}
         />
       );
+    const id = tileId as WidgetId;
     if (realLights && (id === "light" || id === "kitchen")) {
       const lights = hue.live ? hue.snapshot?.lights || [] : [];
       const shellyLights = shelly.live
@@ -359,7 +367,15 @@ export default function App() {
       const available =
         (hue.live && hue.available) || shellyLights.some((c) => c.available);
       return (
-        <article className="home-tile tile-light" key={id}>
+        <article
+          className="home-tile tile-light"
+          key={id}
+          data-active={
+            available &&
+            ((hue.available && lights.some((l) => l.on && l.reachable)) ||
+              shellyLights.some((c) => c.available && c.on))
+          }
+        >
           <button
             className="tile-open"
             aria-label={`${widgetNames[id]} bedienen`}
@@ -406,7 +422,20 @@ export default function App() {
 
     const Icon = icons[id];
     return (
-      <article className={`home-tile tile-${id}`} key={id}>
+      <article
+        className={`home-tile tile-${id}`}
+        key={id}
+        data-active={
+          id === "light"
+            ? state.lights.living
+            : id === "kitchen"
+              ? state.lights.kitchen
+              : id === "climate"
+                ? state.target > 20.5
+                : undefined
+        }
+        data-playing={id === "music" ? state.music.playing : undefined}
+      >
         <button
           className="tile-open"
           aria-label={`${widgetNames[id]} bedienen`}
@@ -455,6 +484,15 @@ export default function App() {
             </>
           ) : id === "music" ? (
             <>
+              <span
+                className="album-art"
+                data-track={state.music.track}
+                aria-hidden="true"
+              >
+                <i />
+                <i />
+                <i />
+              </span>
               <strong className="track-title">{track.title}</strong>
               <span>{track.artist} · demo</span>
             </>
@@ -612,10 +650,15 @@ export default function App() {
       >
         <ChevronLeft size={16} />
       </button>
-      <span>
+      <span className="pagination-status" role="status">
         {pageCount > 1
           ? `Tegels ${safeTilePage + 1} / ${pageCount}`
           : "Alles in één oogopslag"}
+      </span>
+      <span className="pagination-dots" aria-hidden="true">
+        {Array.from({ length: pageCount }, (_, index) => (
+          <i key={index} data-active={index === safeTilePage} />
+        ))}
       </span>
       <button
         className="icon-button"
@@ -632,6 +675,8 @@ export default function App() {
     <div
       className={`app-shell dashboard-shell density-${layout[profile].density}`}
       data-profile={profile}
+      data-page={page}
+      data-mood={hue.live ? "hue" : state.scene || "custom"}
     >
       <header className="topbar">
         <a
@@ -989,6 +1034,15 @@ export default function App() {
         </div>
       </main>
       <nav className="bottom-nav" aria-label="Hoofdnavigatie">
+        <span
+          className="nav-selection"
+          aria-hidden="true"
+          style={
+            {
+              "--nav-index": pages.findIndex((p) => p.id === page),
+            } as CSSProperties
+          }
+        />
         {pages.map(({ id, label, icon: Icon }) => (
           <button
             key={id}

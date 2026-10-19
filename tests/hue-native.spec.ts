@@ -13,7 +13,7 @@ test("native Hue flow: pair read-only, use original scenes, control lamps and bl
       id: "001788fffe123456",
       name: "Mijn Bridge",
     };
-    let paired = false,
+    let paired = sessionStorage.getItem("test.hue.paired") === "true",
       on = true,
       brightness = 68,
       active = false;
@@ -79,6 +79,7 @@ test("native Hue flow: pair read-only, use original scenes, control lamps and bl
         if (method === "inspect") return bridge;
         if (method === "pair") {
           paired = true;
+          sessionStorage.setItem("test.hue.paired", "true");
           return snapshot();
         }
         if (method === "getResources") return snapshot();
@@ -123,11 +124,29 @@ test("native Hue flow: pair read-only, use original scenes, control lamps and bl
     .filter({ hasText: "Mijn avond" })
     .getByRole("checkbox")
     .check();
+  await page.getByLabel("Icoon aanpassen · Mijn avond").click();
+  await page
+    .getByRole("button", { name: "Filmavond voor Mijn avond", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", {
+      name: "Filmavond voor Mijn avond",
+      exact: true,
+    }),
+  ).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: "Klaar", exact: true }).click();
   await expect(
     page.getByRole("region", { name: "Mijn Hue-scènes" }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "Mijn avond Woonkamer" }).click();
+  const scene = page.getByRole("button", { name: "Mijn avond", exact: true });
+  await expect(scene.locator('[data-scene-icon="movie"]')).toBeVisible();
+  await expect(
+    page.getByRole("region", { name: "Mijn Hue-scènes" }),
+  ).not.toContainText("Woonkamer");
+  await page.reload();
+  await expect(scene.locator('[data-scene-icon="movie"]')).toBeVisible();
+  await expect(scene).toBeEnabled();
+  await page.getByRole("button", { name: "Mijn avond", exact: true }).click();
   await expect
     .poll(() =>
       page.evaluate(() =>
@@ -176,7 +195,7 @@ test("native Hue flow: pair read-only, use original scenes, control lamps and bl
   ).toBeDisabled();
   await page.getByRole("button", { name: "Venster sluiten" }).click();
   await expect(
-    page.getByRole("button", { name: "Mijn avond Woonkamer" }),
+    page.getByRole("button", { name: "Mijn avond", exact: true }),
   ).toBeDisabled();
   await page.getByRole("button", { name: "Instellingen", exact: true }).click();
   await page.getByRole("button", { name: "Demo", exact: true }).click();

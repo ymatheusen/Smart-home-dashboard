@@ -25,6 +25,9 @@ android {
                 storePassword System.getenv('MW_ANDROID_STORE_PASSWORD')
                 keyAlias System.getenv('MW_ANDROID_STORE_ALIAS')
                 keyPassword System.getenv('MW_ANDROID_STORE_PASSWORD')
+                enableV1Signing true
+                enableV2Signing true
+                enableV3Signing true
             }
         }
     }

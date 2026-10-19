@@ -5,6 +5,18 @@ import static org.junit.Assert.*;
 import org.json.JSONObject;
 
 public class ShellyPolicyTest {
+    @Test public void missingAndNullNamesUseReadableFallbacks() throws Exception {
+        JSONObject status = new JSONObject("{\"switch:0\":{\"id\":0,\"output\":true},\"switch:1\":{\"id\":1,\"output\":false}}");
+        for (Object name : new Object[]{JSONObject.NULL, "null", " undefined ", "  ", 123}) {
+            JSONObject config = new JSONObject().put("switch:0", new JSONObject().put("name", name));
+            JSONObject device = ShellyPolicy.snapshot(info("switch"), status, config, "192.168.1.51", "Verlichting");
+            assertEquals("Verlichting · lamp 1", device.getJSONArray("channels").getJSONObject(0).getString("name"));
+            assertEquals("Verlichting · lamp 2", device.getJSONArray("channels").getJSONObject(1).getString("name"));
+        }
+        JSONObject coverStatus = new JSONObject("{\"cover:0\":{\"id\":0,\"state\":\"stopped\",\"pos_control\":false}}");
+        JSONObject coverConfig = new JSONObject("{\"cover:0\":{\"name\":null}}");
+        assertEquals("Rolluik salon", ShellyPolicy.snapshot(info("cover"), coverStatus, coverConfig, "192.168.1.50", "Rolluik salon").getJSONArray("channels").getJSONObject(0).getString("name"));
+    }
     private JSONObject info(String profile) throws Exception { return new JSONObject().put("id", "shellyplus2pm-aabbccddeeff").put("gen", 2).put("app", "Plus2PM").put("profile", profile); }
     private JSONObject cover(boolean calibrated, boolean fault) throws Exception {
         JSONObject status = new JSONObject("{\"cover:0\":{\"id\":0,\"state\":\"stopped\",\"pos_control\":" + calibrated + ",\"current_pos\":42" + (fault ? ",\"errors\":[\"overpower\"]" : "") + "}}");

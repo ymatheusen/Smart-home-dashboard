@@ -28,8 +28,8 @@ export default defineConfig(({ command, mode }) => ({
           start_url: "./",
           scope: "./",
           display: "standalone",
-          background_color: "#141614",
-          theme_color: "#141614",
+          background_color: "#100f0e",
+          theme_color: "#100f0e",
           categories: ["lifestyle", "utilities"],
           icons: [
             {
@@ -53,7 +53,7 @@ export default defineConfig(({ command, mode }) => ({
           ],
         },
         injectManifest: {
-          globPatterns: ["**/*.{js,css,html,svg,png,woff,woff2,webmanifest}"],
+          globPatterns: ["**/*.{js,css,html,svg,png,webp,woff,woff2,webmanifest}"],
         },
       }),
   ],

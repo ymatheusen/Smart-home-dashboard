@@ -77,6 +77,14 @@ try {
     localStorage.getItem("mijn-woning.layout.v1"),
   ]);
 
+  // The photographic background must be available after a genuine offline reload.
+  const backgroundURL = await page
+    .locator(".dashboard-shell")
+    .evaluate((el) => {
+      const background = getComputedStyle(el, "::before").backgroundImage;
+      return background.match(/url\(["']?([^"')]+)["']?\)/)?.[1];
+    });
+  assert(backgroundURL, "The room background must have a local asset URL");
   // Genuine offline browser navigation, not a mocked resource response.
   await context.setOffline(true);
   await page.reload();
@@ -86,6 +94,13 @@ try {
   await expect(
     page.getByRole("switch", { name: "Woonkamerverlichting" }),
   ).toHaveAttribute("aria-checked", "false");
+  assert(
+    await page.evaluate(async (url) => {
+      const response = await fetch(url);
+      return response.ok && (await response.blob()).size > 0;
+    }, backgroundURL),
+    "The room background must load through the service worker offline",
+  );
   for (const name of ["Kamers", "Klimaat", "Camera", "Techniek", "Home"])
     await page.getByRole("button", { name, exact: true }).click();
   await page.getByRole("button", { name: "Camera", exact: true }).click();

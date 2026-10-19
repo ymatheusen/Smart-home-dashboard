@@ -2,7 +2,7 @@
 
 ## Installeren en koppelen
 
-1. Download `https://raw.githubusercontent.com/ymatheusen/Smart-home-dashboard/refs/heads/gh-pages/android/Mijn-Woning.apk` op je Android-telefoon of tablet. De downloadpagina staat op `/Smart-home-dashboard/android/`.
+1. Download `https://ymatheusen.github.io/Smart-home-dashboard/android/Mijn-Woning-0.5.3.apk` op je Android-telefoon of tablet. Gebruik Chrome buiten de ingebouwde chatbrowser. Vanaf 0.5.1 kun je deze versie over de bestaande app installeren; verwijder de app niet. Bij overstappen van 0.5.0 geldt de sleutelwissel hieronder.
 2. Open de APK. Android kan vragen of je browser deze app mag installeren. De app wordt handmatig geïnstalleerd en staat niet in de Play Store. Beveiligingscontroles hoeven niet uitgeschakeld te worden.
 3. Open het nieuw geïnstalleerde Android-icoon **Mijn Woning**. De eerdere browser-PWA kan daarnaast blijven bestaan; die heeft geen native Hue-koppeling. Browserinstellingen worden niet automatisch naar de Android-app overgezet.
 4. Verbind het toestel met hetzelfde thuisnetwerk als de Hue Bridge. Open **Instellingen** en de kaart **Philips Hue**.
@@ -17,23 +17,33 @@ Een vierkante Hue Bridge met actuele firmware en de lokale CLIP v2-API is vereis
 
 Maak en bewerk scènes in de officiële Hue-app. Sla ze daar bij een kamer of zone op. De Android-app haalt de op de Bridge opgeslagen scènes op en activeert ze via hun oorspronkelijke resource-ID. Hij maakt geen kopieën en wijzigt of verwijdert je Hue-scènes niet. Losse voorbeeldscènes uit een galerij die nog niet op de Bridge zijn opgeslagen, kunnen niet worden opgehaald.
 
-In Live-modus tonen de snelknoppen je eigen favorieten met kamer- of zonenaam. Er passen maximaal zes scèneknoppen per pagina; extra scènes zijn bladerbaar. Tik na wijzigingen in de Hue-app op **Lampen en scènes verversen**. Bij zichtbare app wordt de status ook ongeveer elke tien seconden opnieuw uitgelezen.
+In Live-modus tonen de snelknoppen je eigen favorieten zonder kamer- of zonenaam. Open bij **Hue-scènes op Home** de icoonkeuze per scène om bijvoorbeeld Filmavond, Lezen of Slapen te kiezen. De keuze blijft op dit apparaat bewaard. Er passen maximaal zes scèneknoppen per pagina; extra scènes zijn bladerbaar. Tik na wijzigingen in de Hue-app op **Lampen en scènes verversen**. Bij zichtbare app wordt de status ook ongeveer elke tien seconden opnieuw uitgelezen.
 
 Tik op de verlichtingstegel voor de lijst met lampen en kamerfilter. Je kunt lampen schakelen en ondersteunde helderheid, wittemperatuur of kleur instellen. Met **Behouden** blijft de bestaande lichtkleur ongemoeid wanneer je alleen de helderheid toepast. De Bridge kan kleuren aanpassen aan het kleurbereik van de lamp.
 
 Een geslaagde opdracht betekent dat de Bridge de opdracht bevestigd heeft. De fysieke reactie van alle lampen moet thuis worden gecontroleerd. Onbereikbare lampen en een onbereikbare Bridge worden niet als succesvol bediend getoond. De overige integraties blijven demo. Demo-modus verstuurt geen licht- of scèneopdrachten.
 
+## Nieuwe APK · versie 0.5.3
+
+0.5.3 is volledig opnieuw gebouwd, met versienummer 5003 en expliciete APK-v1-, v2- en v3-ondertekening. De sleutel en app-identiteit blijven gelijk aan 0.5.1 en 0.5.2. Deze herbouw is een nieuwe installatiepoging; de oorzaak van de Xiaomi-parseermelding is nog onbekend.
+
+## Vormgeving uit versie 0.5.2
+
+0.5.2 gebruikt dezelfde ondertekeningssleutel als 0.5.1. Installeer de APK over 0.5.1 heen om Hue- en Shelly-koppelingen, eigen namen, scène-iconen en indeling te behouden. De nieuwe vormgeving bevat lokale sfeerbeelden, donkere glastegels, gouden accenten, animatie bij openen en schermwissels en een bewegende navigatie-indicator. Bij Minder beweging worden de effecten uitgeschakeld. Een uitschakelende lamp dimt alleen de achtergrond van zijn tegel; dit verandert de feitelijke apparaatbediening niet.
+
 ## Shelly Plus 2PM koppelen · versie 0.5
 
-Installeer de nieuwe APK **over de bestaande Android-app heen**, met dezelfde ondertekeningssleutel. Verwijder de app niet: zo blijven de Hue-koppeling, Hue-favorieten en dashboardindeling behouden.
+**Build 0.5.1:** bevat aparte tegels, bediening bij loslaten, bewerkbare namen en Hue-scène-iconen. Deze build gebruikt op verzoek een nieuwe ondertekeningssleutel. Download: https://raw.githubusercontent.com/ymatheusen/Smart-home-dashboard/refs/heads/gh-pages/android/Mijn-Woning-0.5.1-nieuwe-sleutel.apk
+
+Voor de overstap van 0.5.0 naar 0.5.1 moet je de bestaande app **eerst verwijderen**; Android accepteert de nieuwe ondertekening niet als update over de oude app. Noteer vooraf je Bridge- en Shelly-IP-adressen en maak zo nodig schermafbeeldingen van je indeling. Installeer daarna 0.5.1 en koppel Hue en Shelly opnieuw. Bij verwijderen verdwijnen de opgeslagen koppelingen, favorieten, eigen namen en indeling. Dit verandert de configuratie op de Bridge of Shelly-modules niet. Latere builds met dezelfde nieuwe sleutel kunnen wel over 0.5.1 heen worden geïnstalleerd.
 
 1. Verbind met het thuisnetwerk. Open **Instellingen → Shelly Plus 2PM**.
 2. Zoek het lokale IP-adres in de Shelly-app bij de apparaatinformatie. Vul een herkenbare naam en het IP-adres in. Voor deze installatie zijn er drie modules: twee rolluikmodules en één lichtmodule met twee kanalen.
 3. Laat het wachtwoordvak uit als lokale authenticatie niet aanstaat. Als de module een wachtwoord vraagt, vink je het aan en vul je het **lokale** Shelly-wachtwoord in; gebruikersnaam is `admin`. Je Shelly-cloudaccount is niet nodig.
 4. Tik op **Shelly controleren en toevoegen**. Alleen apparaatidentiteit, profiel, configuratie en status worden gelezen. Toevoegen verplaatst geen rolluik en schakelt geen lamp.
 5. Herhaal voor de andere modules. De app herkent Gen 2 Plus2PM in het bestaande `cover`- of `switch`-profiel. Hij verandert geen profiel, bedrading, beveiligingen, kalibratie of apparaatconfiguratie.
-6. Open **Verlichting** voor Hue-lampen en de twee afzonderlijke Shelly-lichtkanalen. De Plus 2PM is een schakelmodule en ondersteunt geen dimmen. Kanaalnamen stel je in de Shelly-app in; anders toont de app de modulenaam met lamp 1 en lamp 2.
-7. Open **Rolluiken** voor beide rolluiken. De Home-tegel biedt een keuzelijst plus open/stop/sluit voor het geselecteerde rolluik. Staat de tegel op een volgende tegelpagina, gebruik dan de pijlen of zet hem via **Indeling** vooraan. Bestaande indelingsvoorkeuren worden behouden.
+6. Open **Verlichting** voor Hue-lampen en de twee afzonderlijke Shelly-lichtkanalen. De Plus 2PM is een schakelmodule en ondersteunt geen dimmen. Open bij de opgeslagen module **Namen aanpassen** om de module en kanalen in deze app een eigen naam te geven. Deze namen blijven op dit apparaat bewaard en veranderen de Shelly-configuratie niet. Ontbrekende namen, ook `null`, krijgen een leesbare vervangende naam.
+7. Elk rolluik heeft een eigen tegel op Home en Kamers, met open/stop/sluit en na kalibratie een schuif. De schuif verstuurt één positieopdracht bij loslaten; toetsenbordbediening verstuurt bij loslaten van de toets. Afgebroken aanrakingen versturen geen opdracht. Tik op een tegeltitel voor de uitgebreide rolluikbediening. Staan de tegels op een volgende tegelpagina, gebruik dan de pijlen of zet Rolluik via **Indeling** vooraan. Bestaande indelingsvoorkeuren worden behouden.
 
 Procentbediening is alleen zichtbaar wanneer de module `pos_control: true` meldt. 0% betekent gesloten, 100% geopend. De getoonde stand komt van `current_pos`, geen animatie of geschatte looptijd. Kalibreren blijft een handeling in de Shelly-app. Een foutmelding of lopende kalibratie blokkeert bewegingen behalve Stop. Stop blijft ook na een mislukte uitlezing beschikbaar, maar vereist een bereikbare module om effect te hebben.
 
@@ -84,3 +94,7 @@ Dit bouwt de Android-webbestanden, synchroniseert Capacitor, voert de native JVM
 Gecontroleerd: compilatie van de native module, vijf JVM-tests voor lokale adresvalidatie, resource-ID's, certificaatidentiteit, afgeschermde resources en foutafhandeling; vier modeltests; de koppel- en bedieningsflow in een browser met een gesimuleerde native Bridge; dashboardregressies; APK-ondertekening.
 
 Niet beschikbaar in de cloudomgeving: een fysieke Android-telefoon/tablet en jouw Hue Bridge. Daarom zijn de echte certificaathandshake met jouw firmware, mDNS op je router, Android Keystore op je toestel en de fysieke reactie van je lampen nog niet thuis bevestigd. Begin na koppelen met één herkenbare lamp en één scène. We kunnen vervolgens gericht corrigeren als jouw Bridge of toestel een afwijkende reactie geeft.
+
+### Nieuwe ondertekening van 0.5.1 bewaren
+
+De nieuwe sleutel staat privé buiten de repository in `/workspace/.cache/android-toolchain/signing/mijn-woning.keystore`, met configuratie `/workspace/.cache/android-toolchain/signing/private.json`. Deze paden horen bij de bouwomgeving van deze chat; een andere chat heeft niet automatisch dezelfde bestanden. Een privéback-up staat in `/workspace/shared/downloads/Mijn-Woning-sleutelbackup-PRIVE.zip`. Bewaar deze back-up buiten de tijdelijke bouwomgeving. Deel hem niet via GitHub of andere openbare downloads. Bij herstel naar een ander pad moet het `store`-pad in het configuratiebestand worden aangepast; wachtwoord en alias moeten behouden blijven. Alleen een nieuw sleutelpaar op hetzelfde pad aanmaken levert geen geldige update van deze APK op.
