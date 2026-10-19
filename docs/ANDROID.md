@@ -2,7 +2,7 @@
 
 ## Installeren en koppelen
 
-1. Download `https://ymatheusen.github.io/Smart-home-dashboard/android/Mijn-Woning-0.5.2.apk` op je Android-telefoon of tablet. Gebruik Chrome buiten de ingebouwde chatbrowser. Vanaf 0.5.1 kun je deze versie over de bestaande app installeren; verwijder de app niet. Bij overstappen van 0.5.0 geldt de sleutelwissel hieronder.
+1. Download `https://ymatheusen.github.io/Smart-home-dashboard/android/Mijn-Woning-0.5.3.apk` op je Android-telefoon of tablet. Gebruik Chrome buiten de ingebouwde chatbrowser. Vanaf 0.5.1 kun je deze versie over de bestaande app installeren; verwijder de app niet. Bij overstappen van 0.5.0 geldt de sleutelwissel hieronder.
 2. Open de APK. Android kan vragen of je browser deze app mag installeren. De app wordt handmatig geïnstalleerd en staat niet in de Play Store. Beveiligingscontroles hoeven niet uitgeschakeld te worden.
 3. Open het nieuw geïnstalleerde Android-icoon **Mijn Woning**. De eerdere browser-PWA kan daarnaast blijven bestaan; die heeft geen native Hue-koppeling. Browserinstellingen worden niet automatisch naar de Android-app overgezet.
 4. Verbind het toestel met hetzelfde thuisnetwerk als de Hue Bridge. Open **Instellingen** en de kaart **Philips Hue**.
@@ -23,7 +23,11 @@ Tik op de verlichtingstegel voor de lijst met lampen en kamerfilter. Je kunt lam
 
 Een geslaagde opdracht betekent dat de Bridge de opdracht bevestigd heeft. De fysieke reactie van alle lampen moet thuis worden gecontroleerd. Onbereikbare lampen en een onbereikbare Bridge worden niet als succesvol bediend getoond. De overige integraties blijven demo. Demo-modus verstuurt geen licht- of scèneopdrachten.
 
-## Vormgeving en updates · versie 0.5.2
+## Nieuwe APK · versie 0.5.3
+
+0.5.3 is volledig opnieuw gebouwd, met versienummer 5003 en expliciete APK-v1-, v2- en v3-ondertekening. De sleutel en app-identiteit blijven gelijk aan 0.5.1 en 0.5.2. Deze herbouw is een nieuwe installatiepoging; de oorzaak van de Xiaomi-parseermelding is nog onbekend.
+
+## Vormgeving uit versie 0.5.2
 
 0.5.2 gebruikt dezelfde ondertekeningssleutel als 0.5.1. Installeer de APK over 0.5.1 heen om Hue- en Shelly-koppelingen, eigen namen, scène-iconen en indeling te behouden. De nieuwe vormgeving bevat lokale sfeerbeelden, donkere glastegels, gouden accenten, animatie bij openen en schermwissels en een bewegende navigatie-indicator. Bij Minder beweging worden de effecten uitgeschakeld. Een uitschakelende lamp dimt alleen de achtergrond van zijn tegel; dit verandert de feitelijke apparaatbediening niet.
 
